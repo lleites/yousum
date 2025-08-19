@@ -49,7 +49,7 @@ if (typeof document !== 'undefined') {
       try {
         status.textContent = 'Authenticating...';
         const key = await decryptStoredKey();
-        status.textContent = 'Decrypted API key: ' + key;
+        status.textContent = 'API key successfully decrypted.';
       } catch (e) {
         status.textContent = 'Error: ' + e.message;
       }
