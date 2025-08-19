@@ -87,29 +87,34 @@ if (typeof window !== 'undefined' && window.trustedTypes && !window.trustedTypes
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', async () => {
     const status = document.getElementById('status');
+    const logEl = document.getElementById('log');
+    const log = msg => { if (logEl) logEl.textContent += msg + '\n'; };
+    const setStatus = msg => { status.textContent = msg; log(msg); };
+
     const stored = await getKeyRecord();
     if (!stored) {
-      status.textContent = 'No API key stored. Visit the settings page to configure one.';
+      setStatus('No API key stored. Visit the settings page to configure one.');
     }
     document.getElementById('summarize').addEventListener('click', async () => {
       const url = document.getElementById('url').value;
       const summaryEl = document.getElementById('summary');
       summaryEl.textContent = '';
+      if (logEl) logEl.textContent = '';
       try {
         const record = await getKeyRecord();
         if (!record) throw new Error('No stored API key. Use the settings page.');
-        status.textContent = 'Authenticating...';
+        setStatus('Authenticating...');
         const apiKey = await decryptStoredKey();
-        status.textContent = 'Fetching transcript...';
+        setStatus('Fetching transcript...');
         const videoId = parseVideoId(url);
         if (!videoId) throw new Error('Invalid URL');
         const { transcript, title } = await fetchTranscript(videoId);
-        status.textContent = `Summarizing "${title}"...`;
+        setStatus(`Summarizing "${title}"...`);
         const summary = await summarize(transcript, apiKey);
         summaryEl.textContent = summary;
-        status.textContent = 'Done.';
+        setStatus('Done.');
       } catch (e) {
-        status.textContent = 'Error: ' + e.message;
+        setStatus('Error: ' + e.message);
       }
     });
   });
