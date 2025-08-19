@@ -37,10 +37,13 @@
     }
 
     async function fetchTranscript(videoId) {
-        const res = await fetch(`https://youtubetranscript.com/?server_vid2=${videoId}`);
+        const res = await fetch(`https://youtubetotranscript.com/transcript?v=${videoId}`);
         if (!res.ok) throw new Error('Transcript not available');
-        const data = await res.json();
-        return data.map(d => d.text).join(' ');
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const segments = Array.from(doc.querySelectorAll('span[data-start]'));
+        if (!segments.length) throw new Error('Transcript not found');
+        return segments.map(s => s.textContent.trim()).join(' ');
     }
 
     async function summarize(text, apiKey) {

@@ -10,7 +10,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 5. To remove or change the key later, use the **Reset API Key** button.
 
 ## Notes
-- The transcript is fetched from `youtubetranscript.com`. If a transcript is unavailable or the request fails, an error will be shown.
+- The transcript is fetched from `youtubetotranscript.com`. If a transcript is unavailable or the request fails, an error will be shown.
 - Summaries are generated via the `gpt-5-mini` chat completion endpoint.
 - Long videos might exceed token limits; short videos work best.
 - The summarization prompt lives in `prompt.md`; edit it to change the summary style.
