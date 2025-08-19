@@ -5,9 +5,10 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 ## Usage
 1. Open `index.html` (or the deployed GitHub Pages site).
 2. Enter the YouTube video URL.
-3. Enter an OpenAI API key (the free tier works) the first time you use the app. It will be stored encrypted in your browser for future visits.
+3. Enter an OpenAI API key the first time you use the app. You'll be prompted to create a passkey (fingerprint/FaceID/PIN) which is required to encrypt and later decrypt the key.
 4. Click **Summarize** to generate a summary.
-5. To remove or change the key later, use the **Reset API Key** button.
+5. On later visits, click **Decrypt with passkey** to unlock the stored key before summarizing.
+6. To remove or change the key later, use the **Reset API Key** button.
 
 ## Notes
 - The transcript is fetched from `youtubetotranscript.com`. If a transcript is unavailable or the request fails, an error will be shown.
@@ -16,4 +17,4 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 - The summarization prompt lives in `prompt.md`; edit it to change the summary style.
 
 ## Development
-No build step is required; the site is pure HTML/JS/CSS. Tests are not defined.
+No build step is required; the site is pure HTML/JS/CSS. Run `npm test` to execute the small test suite.
