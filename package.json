@@ -1,0 +1,19 @@
+{
+  "name": "yousum",
+  "version": "1.0.0",
+  "description": "This project is a self-contained GitHub Pages site that summarizes the transcript of a YouTube video using the OpenAI API. Provide a YouTube URL and your OpenAI API key to generate a short summary and bullet-point conclusions.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "jsdom": "^26.1.0"
+  }
+}
