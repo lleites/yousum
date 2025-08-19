@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'strict-dynamic'; object-src 'none'; base-uri 'none'; require-trusted-types-for 'script'">
     <title>YouTube Summarizer</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 2rem; max-width: 800px; }
-        input, button { margin: 0.25rem 0; padding: 0.5rem; width: 100%; }
-        #summary { white-space: pre-wrap; margin-top: 1rem; }
-        .api { margin-top: 1rem; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>YouTube Video Summarizer</h1>
     <p>Enter a YouTube URL and (on first use) your OpenAI API key to summarize the video transcript. The key is stored securely in your browser and can be reset at any time.</p>
     <input type="text" id="url" placeholder="YouTube URL">
     <input type="text" id="apiKey" class="api" placeholder="OpenAI API Key">
+    <button id="decryptKey" class="api" style="display:none;">Decrypt with passkey</button>
     <button id="resetKey" class="api" style="display:none;">Reset API Key</button>
     <button id="summarize">Summarize</button>
     <div id="status"></div>
