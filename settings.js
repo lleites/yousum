@@ -9,6 +9,7 @@ function showError(message) {
 
 window.addEventListener('error', (e) => showError(e.error?.message || e.message));
 window.addEventListener('unhandledrejection', (e) => {
+  e.preventDefault();
   const msg = e.reason?.message || e.reason;
   showError(msg);
 });
