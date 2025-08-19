@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'strict-dynamic'; object-src 'none'; base-uri 'none'; require-trusted-types-for 'script'">
+    <title>Settings</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Settings</h1>
+    <p>Use this page to configure the Together API key and set up passkey protection.</p>
+    <ol>
+        <li>Enter your Together API key below and press <strong>Save API Key</strong>.</li>
+        <li>If no passkey exists, the browser will ask you to create one. This passkey is used to encrypt your key.</li>
+        <li>After saving, use <strong>Decrypt with passkey</strong> to authenticate and confirm the key was stored correctly.</li>
+        <li>To start over at any time, click <strong>Reset API Key</strong> which deletes the stored key and passkey information.</li>
+    </ol>
+    <input type="text" id="apiKey" placeholder="Together API Key">
+    <button id="saveKey">Save API Key</button>
+    <button id="decryptKey" style="display:none;">Decrypt with passkey</button>
+    <button id="resetKey" style="display:none;">Reset API Key</button>
+    <div id="status"></div>
+    <p><a href="index.html">Back to summarizer</a></p>
+
+    <script type="module" src="settings.js"></script>
+</body>
+</html>
