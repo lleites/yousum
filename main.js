@@ -52,14 +52,14 @@ async function summarize(text, apiKey) {
   const promptRes = await fetch('prompt.md');
   if (!promptRes.ok) throw new Error('Prompt not found');
   const prompt = await promptRes.text();
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+  const res = await fetch('https://api.together.xyz/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'gpt-5-mini',
+      model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free',
       messages: [
         { role: 'system', content: prompt },
         { role: 'user', content: text }
