@@ -1,5 +1,18 @@
 import { encryptAndStoreKey, decryptStoredKey, getKeyRecord, clearStorage } from './keyManager.js';
 
+function showError(message) {
+  const status = document.getElementById('status');
+  if (status) {
+    status.textContent = 'Error: ' + message;
+  }
+}
+
+window.addEventListener('error', (e) => showError(e.message));
+window.addEventListener('unhandledrejection', (e) => {
+  const msg = e.reason?.message || e.reason;
+  showError(msg);
+});
+
 if (typeof window !== 'undefined' && window.trustedTypes && !window.trustedTypes.defaultPolicy) {
   window.trustedTypes.createPolicy('default', {
     createHTML: s => s,
@@ -41,7 +54,7 @@ if (typeof document !== 'undefined') {
         resetBtn.style.display = 'inline';
         status.textContent = 'API key saved and encrypted.';
       } catch (e) {
-        status.textContent = 'Error: ' + e.message;
+        showError(e.message);
       }
     });
 
@@ -51,7 +64,7 @@ if (typeof document !== 'undefined') {
         const key = await decryptStoredKey();
         status.textContent = 'API key successfully decrypted.';
       } catch (e) {
-        status.textContent = 'Error: ' + e.message;
+        showError(e.message);
       }
     });
 
