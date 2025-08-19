@@ -5,8 +5,9 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 ## Usage
 1. Open `index.html` (or the deployed GitHub Pages site).
 2. Enter the YouTube video URL.
-3. Enter an OpenAI API key (the free tier works).
+3. Enter an OpenAI API key (the free tier works) the first time you use the app. It will be stored encrypted in your browser for future visits.
 4. Click **Summarize** to generate a summary.
+5. To remove or change the key later, use the **Reset API Key** button.
 
 ## Notes
 - The transcript is fetched from `youtubetranscript.com`. If a transcript is unavailable or the request fails, an error will be shown.
