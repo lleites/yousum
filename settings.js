@@ -2,9 +2,9 @@ import { encryptAndStoreKey, decryptStoredKey, getKeyRecord, clearStorage } from
 
 function showError(message) {
   const status = document.getElementById('status');
-  if (status) {
-    status.textContent = 'Error: ' + message;
-  }
+  const logEl = document.getElementById('log');
+  if (status) status.textContent = 'Error: ' + message;
+  if (logEl) logEl.textContent += 'Error: ' + message + '\n';
 }
 
 window.addEventListener('error', (e) => showError(e.error?.message || e.message));
@@ -29,6 +29,11 @@ if (typeof document !== 'undefined') {
     const decryptBtn = document.getElementById('decryptKey');
     const resetBtn = document.getElementById('resetKey');
     const status = document.getElementById('status');
+    const logEl = document.getElementById('log');
+    const setStatus = msg => {
+      status.textContent = msg;
+      if (logEl) logEl.textContent += msg + '\n';
+    };
 
     const stored = await getKeyRecord();
     if (stored) {
@@ -36,24 +41,24 @@ if (typeof document !== 'undefined') {
       saveBtn.style.display = 'none';
       decryptBtn.style.display = 'inline';
       resetBtn.style.display = 'inline';
-      status.textContent = 'Encrypted API key stored.';
+      setStatus('Encrypted API key stored.');
     }
 
     saveBtn.addEventListener('click', async () => {
       const key = apiInput.value.trim();
       if (!key) {
-        status.textContent = 'Please enter an API key.';
+        setStatus('Please enter an API key.');
         return;
       }
       try {
-        status.textContent = 'Saving key...';
+        setStatus('Saving key...');
         await encryptAndStoreKey(key);
         apiInput.value = '';
         apiInput.style.display = 'none';
         saveBtn.style.display = 'none';
         decryptBtn.style.display = 'inline';
         resetBtn.style.display = 'inline';
-        status.textContent = 'API key saved and encrypted.';
+        setStatus('API key saved and encrypted.');
       } catch (e) {
         showError(e.message);
       }
@@ -61,9 +66,9 @@ if (typeof document !== 'undefined') {
 
     decryptBtn.addEventListener('click', async () => {
       try {
-        status.textContent = 'Authenticating...';
+        setStatus('Authenticating...');
         const key = await decryptStoredKey();
-        status.textContent = 'API key successfully decrypted.';
+        setStatus('API key successfully decrypted.');
       } catch (e) {
         showError(e.message);
       }
@@ -75,7 +80,7 @@ if (typeof document !== 'undefined') {
       saveBtn.style.display = 'inline';
       decryptBtn.style.display = 'none';
       resetBtn.style.display = 'none';
-      status.textContent = 'Stored key cleared.';
+      setStatus('Stored key cleared.');
     });
   });
 }
