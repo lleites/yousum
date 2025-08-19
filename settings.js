@@ -7,7 +7,7 @@ function showError(message) {
   }
 }
 
-window.addEventListener('error', (e) => showError(e.message));
+window.addEventListener('error', (e) => showError(e.error?.message || e.message));
 window.addEventListener('unhandledrejection', (e) => {
   const msg = e.reason?.message || e.reason;
   showError(msg);
