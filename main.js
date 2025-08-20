@@ -54,6 +54,22 @@ function estimateTokens(str) {
   return Math.ceil(str.length / 4);
 }
 
+async function fetchWithRetry(url, options, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch(url, options);
+      if (res.status === 503 && i < retries - 1) {
+        await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+        continue;
+      }
+      return res;
+    } catch (e) {
+      if (i === retries - 1) throw e;
+      await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+    }
+  }
+}
+
 async function summarize(text, apiKey) {
   const promptRes = await fetch('prompt.md');
   if (!promptRes.ok) throw new Error('Prompt not found');
@@ -71,7 +87,7 @@ async function summarize(text, apiKey) {
   }
   const maxTokens = Math.max(1, Math.min(MAX_OUTPUT, LIMIT - promptTokens - textTokens));
 
-  const res = await fetch('https://api.together.xyz/v1/chat/completions', {
+  const res = await fetchWithRetry('https://api.together.xyz/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -121,20 +137,10 @@ if (typeof document !== 'undefined') {
       try {
         const record = await getKeyRecord();
         if (!record) throw new Error('No stored API key. Use the settings page.');
-        let apiKey;
-        try {
-          setStatus('Authenticating...');
-          apiKey = await decryptStoredKey();
-        } catch (e) {
-          if (e.message === 'PIN required') {
-            const pin = prompt('Enter PIN');
-            if (!pin) throw new Error('PIN required');
-            setStatus('Authenticating...');
-            apiKey = await decryptStoredKey(pin);
-          } else {
-            throw e;
-          }
-        }
+        const pin = prompt('Enter PIN');
+        if (!pin) throw new Error('PIN required');
+        setStatus('Authenticating...');
+        const apiKey = await decryptStoredKey(pin);
         setStatus('Fetching transcript...');
         const videoId = parseVideoId(url);
         if (!videoId) throw new Error('Invalid URL');
