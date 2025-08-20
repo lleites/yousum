@@ -12,7 +12,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 ## Notes
 - The transcript is fetched from `youtubetotranscript.com`. If a transcript is unavailable or the request fails, an error will be shown.
 - Summaries are generated via the `meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` chat completion endpoint provided by Together AI.
-- Long videos might exceed token limits; short videos work best.
+- Long videos may exceed token limits; the app truncates transcripts and adjusts the output length to stay within Together AI's limits.
 - The summarization prompt lives in `prompt.md`; edit it to change the summary style.
 - Secure key storage uses the Web Crypto API to encrypt the API key with a PIN you choose. Passkeys may be used for additional authentication, but are not required and no experimental browser extensions are needed.
 
