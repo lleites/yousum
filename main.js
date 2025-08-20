@@ -103,8 +103,10 @@ if (typeof document !== 'undefined') {
       try {
         const record = await getKeyRecord();
         if (!record) throw new Error('No stored API key. Use the settings page.');
+        const pin = prompt('Enter PIN');
+        if (!pin) throw new Error('PIN required');
         setStatus('Authenticating...');
-        const apiKey = await decryptStoredKey();
+        const apiKey = await decryptStoredKey(pin);
         setStatus('Fetching transcript...');
         const videoId = parseVideoId(url);
         if (!videoId) throw new Error('Invalid URL');

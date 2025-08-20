@@ -28,6 +28,7 @@ if (typeof document !== 'undefined') {
     const saveBtn = document.getElementById('saveKey');
     const decryptBtn = document.getElementById('decryptKey');
     const resetBtn = document.getElementById('resetKey');
+    const pinInput = document.getElementById('pin');
     const status = document.getElementById('status');
     const logEl = document.getElementById('log');
     const setStatus = msg => {
@@ -38,6 +39,7 @@ if (typeof document !== 'undefined') {
     const stored = await getKeyRecord();
     if (stored) {
       apiInput.style.display = 'none';
+      pinInput.style.display = 'none';
       saveBtn.style.display = 'none';
       decryptBtn.style.display = 'inline';
       resetBtn.style.display = 'inline';
@@ -46,15 +48,18 @@ if (typeof document !== 'undefined') {
 
     saveBtn.addEventListener('click', async () => {
       const key = apiInput.value.trim();
-      if (!key) {
-        setStatus('Please enter an API key.');
+      const pin = pinInput.value;
+      if (!key || !pin) {
+        setStatus('Please enter an API key and PIN.');
         return;
       }
       try {
         setStatus('Saving key...');
-        await encryptAndStoreKey(key);
+        await encryptAndStoreKey(key, pin);
         apiInput.value = '';
+        pinInput.value = '';
         apiInput.style.display = 'none';
+        pinInput.style.display = 'none';
         saveBtn.style.display = 'none';
         decryptBtn.style.display = 'inline';
         resetBtn.style.display = 'inline';
@@ -66,8 +71,13 @@ if (typeof document !== 'undefined') {
 
     decryptBtn.addEventListener('click', async () => {
       try {
+        const pin = prompt('Enter PIN');
+        if (!pin) {
+          setStatus('PIN required.');
+          return;
+        }
         setStatus('Authenticating...');
-        const key = await decryptStoredKey();
+        const key = await decryptStoredKey(pin);
         setStatus('API key successfully decrypted.');
       } catch (e) {
         showError(e.message);
@@ -77,6 +87,7 @@ if (typeof document !== 'undefined') {
     resetBtn.addEventListener('click', async () => {
       await clearStorage();
       apiInput.style.display = 'inline';
+      pinInput.style.display = 'inline';
       saveBtn.style.display = 'inline';
       decryptBtn.style.display = 'none';
       resetBtn.style.display = 'none';

@@ -1,5 +1,5 @@
 const DB_NAME = 'yousum-config';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const KEY_STORE = 'keys.store';
 const WEBAUTHN_STORE = 'webauthn';
 
@@ -82,60 +82,90 @@ async function registerPasskey() {
     authenticatorSelection: {
       authenticatorAttachment: 'platform',
       userVerification: 'required'
-    },
-    extensions: { largeBlob: { support: true } }
+    }
   };
   const cred = await navigator.credentials.create({ publicKey });
-  const supported = cred.getClientExtensionResults?.().largeBlob?.supported;
-  if (!supported) {
-    throw new Error('WebAuthn largeBlob extension not supported in this browser');
-  }
   await storeCredId(cred.rawId);
 }
 
-export async function encryptAndStoreKey(apiKey) {
-  let credId = await getCredId();
-  if (!credId) {
-    await registerPasskey();
-    credId = await getCredId();
+function bufToBase64(buf) {
+  if (typeof btoa !== 'undefined') {
+    return btoa(String.fromCharCode(...new Uint8Array(buf)));
   }
-
-  const encoded = new TextEncoder().encode(apiKey);
-  const assertion = await navigator.credentials.get({
-    publicKey: {
-      challenge: crypto.getRandomValues(new Uint8Array(32)),
-      allowCredentials: [{ id: credId, type: 'public-key' }],
-      userVerification: 'required',
-      extensions: { largeBlob: { write: encoded } }
-    }
-  });
-  const written = assertion.getClientExtensionResults()?.largeBlob?.written;
-  if (!written) {
-    throw new Error('Failed to store data in largeBlob');
-  }
-
-  await storeKeyRecord({ createdAt: Date.now() });
+  return Buffer.from(buf).toString('base64');
 }
 
-export async function decryptStoredKey() {
+function base64ToBuf(b64) {
+  if (typeof atob !== 'undefined') {
+    return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  }
+  return new Uint8Array(Buffer.from(b64, 'base64'));
+}
+
+async function deriveKey(pin, salt) {
+  const enc = new TextEncoder().encode(pin);
+  const baseKey = await crypto.subtle.importKey('raw', enc, 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
+
+export async function encryptAndStoreKey(apiKey, pin) {
+  let credId = await getCredId();
+  if (!credId && navigator.credentials) {
+    try {
+      await registerPasskey();
+      credId = await getCredId();
+    } catch {}
+  }
+  if (credId && navigator.credentials) {
+    await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials: [{ id: credId, type: 'public-key' }],
+        userVerification: 'required'
+      }
+    });
+  }
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(pin, salt);
+  const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(apiKey));
+  await storeKeyRecord({
+    salt: bufToBase64(salt),
+    iv: bufToBase64(iv),
+    data: bufToBase64(data),
+    createdAt: Date.now()
+  });
+}
+
+export async function decryptStoredKey(pin) {
   const record = await getKeyRecord();
   if (!record) throw new Error('No stored key');
-
   const credId = await getCredId();
-  if (!credId) throw new Error('No credential');
-
-  const assertion = await navigator.credentials.get({
-    publicKey: {
-      challenge: crypto.getRandomValues(new Uint8Array(32)),
-      allowCredentials: [{ id: credId, type: 'public-key' }],
-      userVerification: 'required',
-      extensions: { largeBlob: { read: true } }
-    }
-  });
-  const blob = assertion.getClientExtensionResults()?.largeBlob?.blob;
-  if (!blob) {
-    throw new Error('Failed to read data from largeBlob');
+  if (credId && navigator.credentials) {
+    await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials: [{ id: credId, type: 'public-key' }],
+        userVerification: 'required'
+      }
+    });
   }
-  return new TextDecoder().decode(new Uint8Array(blob));
+  const salt = base64ToBuf(record.salt);
+  const iv = base64ToBuf(record.iv);
+  const data = base64ToBuf(record.data);
+  const key = await deriveKey(pin, salt);
+  let decrypted;
+  try {
+    decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+  } catch {
+    throw new Error('Invalid PIN or corrupted data');
+  }
+  return new TextDecoder().decode(decrypted);
 }
 
