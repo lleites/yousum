@@ -41,7 +41,7 @@ if (typeof document !== 'undefined') {
       saveBtn.style.display = 'none';
       decryptBtn.style.display = 'inline';
       resetBtn.style.display = 'inline';
-      setStatus('Encrypted API key stored.');
+      setStatus('API key stored.');
     }
 
     saveBtn.addEventListener('click', async () => {
@@ -58,7 +58,7 @@ if (typeof document !== 'undefined') {
         saveBtn.style.display = 'none';
         decryptBtn.style.display = 'inline';
         resetBtn.style.display = 'inline';
-        setStatus('API key saved and encrypted.');
+        setStatus('API key saved.');
       } catch (e) {
         showError(e.message);
       }

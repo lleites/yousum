@@ -3,7 +3,7 @@
 This project is a self-contained GitHub Pages site that summarizes the transcript of a YouTube video using the Together AI API. Provide a YouTube URL and your Together API key to generate a short summary and bullet-point conclusions.
 
 ## Usage
-1. Open `settings.html` to configure the Together API key. Enter the key and save it; the browser will guide you through creating a passkey which is used to encrypt the key.
+1. Open `settings.html` to configure the Together API key. Enter the key and save it; the browser will guide you through creating a passkey which is used to securely store the key.
 2. (Optional) Use the **Decrypt with passkey** button on the settings page to authenticate and verify the stored key.
 3. Navigate to `index.html` (or the deployed GitHub Pages site).
 4. Enter the YouTube video URL and click **Summarize**. You will be prompted for your passkey to decrypt the stored API key before the summary is generated.
@@ -14,6 +14,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 - Summaries are generated via the `meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` chat completion endpoint provided by Together AI.
 - Long videos might exceed token limits; short videos work best.
 - The summarization prompt lives in `prompt.md`; edit it to change the summary style.
+- Secure key storage uses the WebAuthn largeBlob extension, available in modern browsers, to protect the API key with your passkey. If your browser lacks this extension, saving the API key will fail.
 
 ## Development
 No build step is required; the site is pure HTML/JS/CSS. Run `npm test` to execute the small test suite.

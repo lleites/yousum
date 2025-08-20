@@ -83,64 +83,59 @@ async function registerPasskey() {
       authenticatorAttachment: 'platform',
       userVerification: 'required'
     },
-    extensions: { prf: { enable: true } }
+    extensions: { largeBlob: { support: true } }
   };
   const cred = await navigator.credentials.create({ publicKey });
+  const supported = cred.getClientExtensionResults?.().largeBlob?.supported;
+  if (!supported) {
+    throw new Error('WebAuthn largeBlob extension not supported in this browser');
+  }
   await storeCredId(cred.rawId);
-}
-
-async function deriveAesKey(salt) {
-  const credId = await getCredId();
-  if (!credId) throw new Error('No credential');
-  const assertion = await navigator.credentials.get({
-    publicKey: {
-      challenge: crypto.getRandomValues(new Uint8Array(32)),
-      allowCredentials: [{ id: credId, type: 'public-key' }],
-      userVerification: 'required',
-      extensions: { prf: { eval: { first: salt } } }
-    }
-  });
-  const exts = assertion.getClientExtensionResults();
-  const prfBytes = exts?.prf?.results?.first;
-  if (!prfBytes) throw new Error('PRF not supported');
-  const base = await crypto.subtle.importKey('raw', prfBytes, 'HKDF', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    { name: 'HKDF', hash: 'SHA-256', salt, info: new Uint8Array([]) },
-    base,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt', 'decrypt']
-  );
 }
 
 export async function encryptAndStoreKey(apiKey) {
   let credId = await getCredId();
   if (!credId) {
     await registerPasskey();
+    credId = await getCredId();
   }
-  const salt = crypto.getRandomValues(new Uint8Array(32));
-  const aesKey = await deriveAesKey(salt);
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+
   const encoded = new TextEncoder().encode(apiKey);
-  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, aesKey, encoded);
-  await storeKeyRecord({
-    ciphertext: Array.from(new Uint8Array(ciphertext)),
-    iv: Array.from(iv),
-    salt: Array.from(salt),
-    createdAt: Date.now()
+  const assertion = await navigator.credentials.get({
+    publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: [{ id: credId, type: 'public-key' }],
+      userVerification: 'required',
+      extensions: { largeBlob: { write: encoded } }
+    }
   });
+  const written = assertion.getClientExtensionResults()?.largeBlob?.written;
+  if (!written) {
+    throw new Error('Failed to store data in largeBlob');
+  }
+
+  await storeKeyRecord({ createdAt: Date.now() });
 }
 
 export async function decryptStoredKey() {
   const record = await getKeyRecord();
   if (!record) throw new Error('No stored key');
-  const { ciphertext, iv, salt } = record;
-  const aesKey = await deriveAesKey(new Uint8Array(salt));
-  const buffer = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: new Uint8Array(iv) },
-    aesKey,
-    new Uint8Array(ciphertext)
-  );
-  return new TextDecoder().decode(buffer);
+
+  const credId = await getCredId();
+  if (!credId) throw new Error('No credential');
+
+  const assertion = await navigator.credentials.get({
+    publicKey: {
+      challenge: crypto.getRandomValues(new Uint8Array(32)),
+      allowCredentials: [{ id: credId, type: 'public-key' }],
+      userVerification: 'required',
+      extensions: { largeBlob: { read: true } }
+    }
+  });
+  const blob = assertion.getClientExtensionResults()?.largeBlob?.blob;
+  if (!blob) {
+    throw new Error('Failed to read data from largeBlob');
+  }
+  return new TextDecoder().decode(new Uint8Array(blob));
 }
 
