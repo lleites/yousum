@@ -122,25 +122,33 @@ export async function encryptAndStoreKey(apiKey, pin) {
       credId = await getCredId();
     } catch {}
   }
+  let plain;
   if (credId && navigator.credentials) {
-    await navigator.credentials.get({
-      publicKey: {
-        challenge: crypto.getRandomValues(new Uint8Array(32)),
-        allowCredentials: [{ id: credId, type: 'public-key' }],
-        userVerification: 'required'
-      }
-    });
+    try {
+      await navigator.credentials.get({
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          allowCredentials: [{ id: credId, type: 'public-key' }],
+          userVerification: 'required'
+        }
+      });
+      plain = apiKey;
+    } catch {
+      // If biometric auth fails, fall back to PIN-only storage.
+    }
   }
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const key = await deriveKey(pin, salt);
   const data = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(apiKey));
-  await storeKeyRecord({
+  const record = {
     salt: bufToBase64(salt),
     iv: bufToBase64(iv),
     data: bufToBase64(data),
     createdAt: Date.now()
-  });
+  };
+  if (plain) record.plain = plain;
+  await storeKeyRecord(record);
 }
 
 export async function decryptStoredKey(pin) {
@@ -148,14 +156,20 @@ export async function decryptStoredKey(pin) {
   if (!record) throw new Error('No stored key');
   const credId = await getCredId();
   if (credId && navigator.credentials) {
-    await navigator.credentials.get({
-      publicKey: {
-        challenge: crypto.getRandomValues(new Uint8Array(32)),
-        allowCredentials: [{ id: credId, type: 'public-key' }],
-        userVerification: 'required'
-      }
-    });
+    try {
+      await navigator.credentials.get({
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(32)),
+          allowCredentials: [{ id: credId, type: 'public-key' }],
+          userVerification: 'required'
+        }
+      });
+      if (record.plain) return record.plain;
+    } catch {
+      // ignore and fall back to PIN
+    }
   }
+  if (!pin) throw new Error('PIN required');
   const salt = base64ToBuf(record.salt);
   const iv = base64ToBuf(record.iv);
   const data = base64ToBuf(record.data);
