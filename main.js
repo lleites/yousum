@@ -121,10 +121,20 @@ if (typeof document !== 'undefined') {
       try {
         const record = await getKeyRecord();
         if (!record) throw new Error('No stored API key. Use the settings page.');
-        const pin = prompt('Enter PIN');
-        if (!pin) throw new Error('PIN required');
-        setStatus('Authenticating...');
-        const apiKey = await decryptStoredKey(pin);
+        let apiKey;
+        try {
+          setStatus('Authenticating...');
+          apiKey = await decryptStoredKey();
+        } catch (e) {
+          if (e.message === 'PIN required') {
+            const pin = prompt('Enter PIN');
+            if (!pin) throw new Error('PIN required');
+            setStatus('Authenticating...');
+            apiKey = await decryptStoredKey(pin);
+          } else {
+            throw e;
+          }
+        }
         setStatus('Fetching transcript...');
         const videoId = parseVideoId(url);
         if (!videoId) throw new Error('Invalid URL');

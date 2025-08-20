@@ -71,13 +71,23 @@ if (typeof document !== 'undefined') {
 
     decryptBtn.addEventListener('click', async () => {
       try {
-        const pin = prompt('Enter PIN');
-        if (!pin) {
-          setStatus('PIN required.');
-          return;
-        }
         setStatus('Authenticating...');
-        const key = await decryptStoredKey(pin);
+        let key;
+        try {
+          key = await decryptStoredKey();
+        } catch (e) {
+          if (e.message === 'PIN required') {
+            const pin = prompt('Enter PIN');
+            if (!pin) {
+              setStatus('PIN required.');
+              return;
+            }
+            setStatus('Authenticating...');
+            key = await decryptStoredKey(pin);
+          } else {
+            throw e;
+          }
+        }
         setStatus('API key successfully decrypted.');
       } catch (e) {
         showError(e.message);
