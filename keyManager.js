@@ -1,40 +1,21 @@
 const DB_NAME = 'yousum-config';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const KEY_STORE = 'keys.store';
 const WEBAUTHN_STORE = 'webauthn';
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    // Bump the database version when new object stores are introduced so that
-    // onupgradeneeded runs for users with older databases.
+    // Bump the database version when object stores change so that
+    // onupgradeneeded runs for users with older databases. This removes
+    // the legacy WebAuthn store now that biometric auth is gone.
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
+      if (db.objectStoreNames.contains(WEBAUTHN_STORE)) db.deleteObjectStore(WEBAUTHN_STORE);
       if (!db.objectStoreNames.contains(KEY_STORE)) db.createObjectStore(KEY_STORE);
-      if (!db.objectStoreNames.contains(WEBAUTHN_STORE)) db.createObjectStore(WEBAUTHN_STORE);
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
-  });
-}
-
-async function storeCredId(id) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(WEBAUTHN_STORE, 'readwrite');
-    tx.objectStore(WEBAUTHN_STORE).put(id, 'credId');
-    tx.oncomplete = () => resolve();
-    tx.onerror = () => reject(tx.error);
-  });
-}
-
-async function getCredId() {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(WEBAUTHN_STORE, 'readonly');
-    const req = tx.objectStore(WEBAUTHN_STORE).get('credId');
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
   });
 }
 
@@ -61,31 +42,11 @@ export async function getKeyRecord() {
 export async function clearStorage() {
   const db = await openDB();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction([KEY_STORE, WEBAUTHN_STORE], 'readwrite');
+    const tx = db.transaction(KEY_STORE, 'readwrite');
     tx.objectStore(KEY_STORE).delete('apiKey');
-    tx.objectStore(WEBAUTHN_STORE).delete('credId');
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
   });
-}
-
-async function registerPasskey() {
-  const publicKey = {
-    challenge: crypto.getRandomValues(new Uint8Array(32)),
-    rp: { name: 'YouSum' },
-    user: {
-      id: crypto.getRandomValues(new Uint8Array(32)),
-      name: 'local',
-      displayName: 'local'
-    },
-    pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
-    authenticatorSelection: {
-      authenticatorAttachment: 'platform',
-      userVerification: 'required'
-    }
-  };
-  const cred = await navigator.credentials.create({ publicKey });
-  await storeCredId(cred.rawId);
 }
 
 function bufToBase64(buf) {
@@ -115,28 +76,6 @@ async function deriveKey(pin, salt) {
 }
 
 export async function encryptAndStoreKey(apiKey, pin) {
-  let credId = await getCredId();
-  if (!credId && navigator.credentials) {
-    try {
-      await registerPasskey();
-      credId = await getCredId();
-    } catch {}
-  }
-  let plain;
-  if (credId && navigator.credentials) {
-    try {
-      await navigator.credentials.get({
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(32)),
-          allowCredentials: [{ id: credId, type: 'public-key' }],
-          userVerification: 'required'
-        }
-      });
-      plain = apiKey;
-    } catch {
-      // If biometric auth fails, fall back to PIN-only storage.
-    }
-  }
   const salt = crypto.getRandomValues(new Uint8Array(16));
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const key = await deriveKey(pin, salt);
@@ -147,28 +86,12 @@ export async function encryptAndStoreKey(apiKey, pin) {
     data: bufToBase64(data),
     createdAt: Date.now()
   };
-  if (plain) record.plain = plain;
   await storeKeyRecord(record);
 }
 
 export async function decryptStoredKey(pin) {
   const record = await getKeyRecord();
   if (!record) throw new Error('No stored key');
-  const credId = await getCredId();
-  if (credId && navigator.credentials) {
-    try {
-      await navigator.credentials.get({
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(32)),
-          allowCredentials: [{ id: credId, type: 'public-key' }],
-          userVerification: 'required'
-        }
-      });
-      if (record.plain) return record.plain;
-    } catch {
-      // ignore and fall back to PIN
-    }
-  }
   if (!pin) throw new Error('PIN required');
   const salt = base64ToBuf(record.salt);
   const iv = base64ToBuf(record.iv);
