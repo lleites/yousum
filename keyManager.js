@@ -1,10 +1,13 @@
 const DB_NAME = 'yousum-config';
+const DB_VERSION = 2;
 const KEY_STORE = 'keys.store';
 const WEBAUTHN_STORE = 'webauthn';
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, 1);
+    // Bump the database version when new object stores are introduced so that
+    // onupgradeneeded runs for users with older databases.
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(KEY_STORE)) db.createObjectStore(KEY_STORE);
