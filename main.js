@@ -1,4 +1,5 @@
 import { getKeyRecord, decryptStoredKey } from './keyManager.js';
+import { addHistory } from './historyManager.js';
 
 export function parseVideoId(url) {
   try {
@@ -75,13 +76,16 @@ export async function fetchTranscript(videoId) {
   if (!segments.length) throw new Error('Transcript not found');
   const transcript = segments.map(s => s.textContent.trim()).join(' ');
   let title = '';
+  let channel = '';
   const titleEl = doc.querySelector('title');
   if (titleEl) {
     const raw = titleEl.textContent.trim();
     const m = raw.match(/^Transcript of (.+?) - YouTubeToTranscript.com$/);
     title = m ? m[1] : raw;
   }
-  return { transcript, title };
+  const channelEl = doc.querySelector('a[title="Visit YouTube Channel"]');
+  if (channelEl) channel = channelEl.textContent.trim();
+  return { transcript, title, channel };
 }
 
 export async function fetchWithRetry(url, options, retries = 3) {
@@ -161,10 +165,11 @@ if (typeof document !== 'undefined') {
         setStatus('Fetching transcript...');
         const videoId = parseVideoId(url);
         if (!videoId) throw new Error('Invalid URL');
-        const { transcript, title } = await fetchTranscript(videoId);
+        const { transcript, title, channel } = await fetchTranscript(videoId);
         setStatus(`Summarizing "${title}"...`);
         const summary = await summarize(transcript, apiKey);
         summaryEl.innerHTML = renderMarkdown(summary);
+        addHistory({ title, channel, url, summary, transcript });
         setStatus('Done.');
       } catch (e) {
         setStatus('Error: ' + e.message);
