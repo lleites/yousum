@@ -11,7 +11,7 @@ if (typeof window !== 'undefined' && window.trustedTypes && !window.trustedTypes
 }
 
 if (typeof document !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', () => {
+  const init = () => {
     const list = document.getElementById('historyList');
     const items = loadHistory();
     if (!items.length) {
@@ -37,6 +37,11 @@ if (typeof document !== 'undefined') {
       li.appendChild(details);
       list.appendChild(li);
     }
-  });
+  };
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 }
 /* c8 ignore end */
