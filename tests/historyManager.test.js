@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addHistory, loadHistory } from '../historyManager.js';
+import { addHistory, loadHistory, deleteHistory } from '../historyManager.js';
 
 class FakeStorage {
   constructor() { this.store = {}; }
@@ -23,5 +23,16 @@ test('addHistory stores and loadHistory retrieves entries', () => {
 test('loadHistory returns empty array when storage empty', () => {
   global.localStorage = new FakeStorage();
   assert.deepEqual(loadHistory(), []);
+  global.localStorage = originalStorage;
+});
+
+test('deleteHistory removes entry by index', () => {
+  global.localStorage = new FakeStorage();
+  addHistory({ title: 't1', channel: 'c1', url: 'u1', summary: 's1' });
+  addHistory({ title: 't2', channel: 'c2', url: 'u2', summary: 's2' });
+  deleteHistory(0);
+  const items = loadHistory();
+  assert.equal(items.length, 1);
+  assert.equal(items[0].title, 't1');
   global.localStorage = originalStorage;
 });

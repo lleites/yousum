@@ -1,4 +1,4 @@
-import { loadHistory } from './historyManager.js';
+import { loadHistory, deleteHistory } from './historyManager.js';
 import { renderMarkdown } from './render.js';
 
 /* c8 ignore start */
@@ -24,12 +24,44 @@ if (typeof document !== 'undefined') {
       const li = document.createElement('li');
       const details = document.createElement('details');
       const summary = document.createElement('summary');
+
+      const toggle = document.createElement('button');
+      toggle.textContent = '▶';
+      toggle.className = 'toggle';
+      toggle.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        details.open = !details.open;
+        toggle.textContent = details.open ? '▼' : '▶';
+      });
+      summary.appendChild(toggle);
+
       const titleLink = document.createElement('a');
       titleLink.href = item.url;
       titleLink.textContent = item.title;
       titleLink.target = '_blank';
       summary.appendChild(titleLink);
       summary.append(` – ${item.channel}`);
+
+      const del = document.createElement('button');
+      del.textContent = '🗑️';
+      del.className = 'delete';
+      del.addEventListener('click', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (confirm('Delete this entry?')) {
+          const idx = Array.from(list.children).indexOf(li);
+          deleteHistory(idx);
+          li.remove();
+          if (!list.children.length) {
+            const empty = document.createElement('li');
+            empty.textContent = 'No history yet.';
+            list.appendChild(empty);
+          }
+        }
+      });
+      summary.appendChild(del);
+
       details.appendChild(summary);
       const content = document.createElement('div');
       content.innerHTML = renderMarkdown(item.summary);
