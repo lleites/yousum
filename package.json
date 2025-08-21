@@ -1,7 +1,7 @@
 {
   "name": "yousum",
   "version": "1.0.0",
-  "description": "This project is a self-contained GitHub Pages site that summarizes the transcript of a YouTube video using the Together AI API. Provide a YouTube URL and your Together API key to generate a short summary and bullet-point conclusions.",
+  "description": "This project is a self-contained GitHub Pages site that summarizes the transcript of a YouTube video using the Groq API. Provide a YouTube URL and your Groq API key to generate a short summary and bullet-point conclusions.",
   "main": "index.js",
   "directories": {
     "test": "tests"
