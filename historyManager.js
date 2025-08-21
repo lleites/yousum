@@ -18,3 +18,13 @@ export function addHistory(entry) {
     // ignore storage errors
   }
 }
+
+export function deleteHistory(index) {
+  const items = loadHistory();
+  items.splice(index, 1);
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(items));
+  } catch {
+    // ignore storage errors
+  }
+}

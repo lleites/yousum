@@ -42,3 +42,29 @@ nav {
 nav a {
   text-decoration: none;
 }
+
+details summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+summary button {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  color: #e0e0e0;
+  padding: 0.25rem;
+  cursor: pointer;
+}
+
+summary button.toggle {
+  font-size: 1.25rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+summary button.delete {
+  margin-left: auto;
+  width: 2rem;
+  height: 2rem;
+}

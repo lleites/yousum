@@ -39,3 +39,26 @@ test('history.js initializes if DOM is already loaded', async () => {
   delete global.document;
   delete global.localStorage;
 });
+
+test('history.js delete button removes entry', async () => {
+  const { JSDOM } = await import('jsdom');
+  const dom = new JSDOM('<ul id="historyList"></ul>');
+  Object.defineProperty(dom.window.document, 'readyState', { value: 'complete', configurable: true });
+  global.window = dom.window;
+  global.document = dom.window.document;
+  global.confirm = () => true;
+  global.localStorage = {
+    data: [{ url: 'u', title: 't', channel: 'c', summary: 's' }],
+    getItem() { return JSON.stringify(this.data); },
+    setItem(_k, v) { this.data = JSON.parse(v); }
+  };
+  await import('../history.js?delete');
+  dom.window.document.querySelector('button.delete').click();
+  const list = dom.window.document.querySelectorAll('li');
+  assert.equal(list.length, 1);
+  assert.equal(list[0].textContent, 'No history yet.');
+  delete global.window;
+  delete global.document;
+  delete global.localStorage;
+  delete global.confirm;
+});
