@@ -11,14 +11,15 @@ import { fetchTranscript, fetchWithRetry, summarize } from '../main.js';
 
 // fetchTranscript tests
 
-test('fetchTranscript parses transcript and title', async (t) => {
+test('fetchTranscript parses transcript, title, and channel', async (t) => {
   const html = '<title>Transcript of Some Title - YouTubeToTranscript.com</title>' +
-               '<span data-start="0">Hello</span><span data-start="1">World</span>';
+               '<span data-start="0">Hello</span><span data-start="1">World</span><a title="Visit YouTube Channel">Chan</a>';
   const origFetch = global.fetch;
   global.fetch = t.mock.fn(async () => ({ ok: true, text: async () => html }));
-  const { transcript, title } = await fetchTranscript('id');
+  const { transcript, title, channel } = await fetchTranscript('id');
   assert.equal(transcript, 'Hello World');
   assert.equal(title, 'Some Title');
+  assert.equal(channel, 'Chan');
   global.fetch = origFetch;
 });
 
