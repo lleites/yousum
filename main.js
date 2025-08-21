@@ -15,7 +15,7 @@ export function parseVideoId(url) {
   return null;
 }
 
-function renderMarkdown(md) {
+export function renderMarkdown(md) {
   const lines = md.split(/\r?\n/);
   let html = '';
   let inList = false;
@@ -84,7 +84,7 @@ export async function fetchTranscript(videoId) {
   return { transcript, title };
 }
 
-async function fetchWithRetry(url, options, retries = 3) {
+export async function fetchWithRetry(url, options, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       const res = await fetch(url, options);
@@ -100,7 +100,7 @@ async function fetchWithRetry(url, options, retries = 3) {
   }
 }
 
-async function summarize(text, apiKey) {
+export async function summarize(text, apiKey) {
   const promptRes = await fetch('prompt.md');
   if (!promptRes.ok) throw new Error('Prompt not found');
   const prompt = await promptRes.text();
@@ -126,7 +126,7 @@ async function summarize(text, apiKey) {
   const json = await res.json();
   return json.choices[0].message.content.trim();
 }
-
+/* c8 ignore start */
 if (typeof window !== 'undefined' && window.trustedTypes && !window.trustedTypes.defaultPolicy) {
   window.trustedTypes.createPolicy('default', {
     createHTML: s => s,
@@ -172,4 +172,5 @@ if (typeof document !== 'undefined') {
     });
   });
 }
+/* c8 ignore end */
 
