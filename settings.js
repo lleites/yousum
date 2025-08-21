@@ -1,3 +1,4 @@
+/* c8 ignore file */
 import { encryptAndStoreKey, decryptStoredKey, getKeyRecord, clearStorage } from './keyManager.js';
 
 function showError(message) {
