@@ -1,4 +1,36 @@
-body { font-family: Arial, sans-serif; margin: 2rem; max-width: 800px; }
-input, button { margin: 0.25rem 0; padding: 0.5rem; width: 100%; }
-#summary { white-space: pre-wrap; margin-top: 1rem; }
+body {
+  font-family: Arial, sans-serif;
+  margin: 2rem;
+  max-width: 800px;
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+input, button {
+  margin: 0.25rem 0;
+  padding: 0.5rem;
+  width: 100%;
+  background-color: #1e1e1e;
+  color: #e0e0e0;
+  border: 1px solid #333;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: #80cbc4;
+}
+
+#summary {
+  margin-top: 1rem;
+}
+
 .api { margin-top: 1rem; }
+
+pre {
+  background-color: #1e1e1e;
+  padding: 0.5rem;
+  overflow-x: auto;
+}
