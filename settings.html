@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://api.together.xyz https://youtubetotranscript.com; object-src 'none'; base-uri 'none'; require-trusted-types-for 'script'">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; connect-src 'self' https://api.groq.com https://youtubetotranscript.com; object-src 'none'; base-uri 'none'; require-trusted-types-for 'script'">
     <title>Settings</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <h1>Settings</h1>
-    <p>Use this page to configure the Together API key and set up PIN protection.</p>
+    <p>Use this page to configure the Groq API key and set up PIN protection.</p>
     <ol>
-        <li>Enter your Together API key and choose a PIN, then press <strong>Save API Key</strong>.</li>
+        <li>Enter your Groq API key and choose a PIN, then press <strong>Save API Key</strong>.</li>
         <li>After saving, use <strong>Decrypt stored key</strong> to authenticate and confirm the key was stored correctly.</li>
         <li>To start over at any time, click <strong>Reset API Key</strong> which deletes the stored key.</li>
     </ol>
-    <input type="text" id="apiKey" placeholder="Together API Key">
+    <input type="text" id="apiKey" placeholder="Groq API Key">
     <input type="password" id="pin" placeholder="PIN">
     <button id="saveKey">Save API Key</button>
     <button id="decryptKey" style="display:none;">Decrypt stored key</button>

@@ -50,10 +50,6 @@ export async function fetchTranscript(videoId) {
   return { transcript, title };
 }
 
-function estimateTokens(str) {
-  return Math.ceil(str.length / 4);
-}
-
 async function fetchWithRetry(url, options, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
@@ -74,28 +70,15 @@ async function summarize(text, apiKey) {
   const promptRes = await fetch('prompt.md');
   if (!promptRes.ok) throw new Error('Prompt not found');
   const prompt = await promptRes.text();
-
-  const LIMIT = 8192;
-  const MAX_OUTPUT = 2048;
-  const promptTokens = estimateTokens(prompt);
-  let textTokens = estimateTokens(text);
-  if (promptTokens + textTokens >= LIMIT) {
-    const allowed = LIMIT - promptTokens - 1;
-    const ratio = allowed / textTokens;
-    text = text.slice(0, Math.floor(text.length * ratio));
-    textTokens = estimateTokens(text);
-  }
-  const maxTokens = Math.max(1, Math.min(MAX_OUTPUT, LIMIT - promptTokens - textTokens));
-
-  const res = await fetchWithRetry('https://api.together.xyz/v1/chat/completions', {
+  const res = await fetchWithRetry('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`
     },
     body: JSON.stringify({
-      model: 'meta-llama/Llama-3.3-70B-Instruct-Turbo-Free',
-      max_tokens: maxTokens,
+      model: 'openai/gpt-oss-120b',
+      max_completion_tokens: 8192,
       messages: [
         { role: 'system', content: prompt },
         { role: 'user', content: text }
