@@ -11,4 +11,4 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
-      - run: npx c8 -r text npm test
+      - run: npm test
