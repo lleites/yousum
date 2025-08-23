@@ -13,7 +13,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 - The transcript is fetched from `youtubetotranscript.com`. If a transcript is unavailable or the request fails, an error will be shown.
 - Summaries are generated via the `openai/gpt-oss-120b` chat completion endpoint provided by Groq.
 - The `openai/gpt-oss-120b` model offers a large context window, so the app sends the full transcript without calculating token limits.
-- The summarization prompt lives in `prompt.md`; edit it to change the summary style.
+- The summarization prompt lives in `summaryPrompt.md`, and the Q&A prompt in `qaPrompt.md`; edit them to change the styles.
 - Secure key storage uses the Web Crypto API to encrypt the API key with a PIN you choose.
 
 ## Development
