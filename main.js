@@ -4,6 +4,26 @@ import { renderMarkdown } from './render.js';
 
 export { renderMarkdown };
 
+export function stripTracking(url) {
+  try {
+    const u = new URL(url);
+    u.hash = '';
+    if (u.hostname.includes('youtube.com')) {
+      if (u.pathname.startsWith('/watch')) {
+        const v = u.searchParams.get('v');
+        u.search = v ? `?v=${v}` : '';
+      } else {
+        u.search = '';
+      }
+    } else if (u.hostname.includes('youtu.be')) {
+      u.search = '';
+    }
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 export function parseVideoId(url) {
   try {
     const u = new URL(url);
@@ -11,6 +31,9 @@ export function parseVideoId(url) {
       return u.pathname.slice(1);
     }
     if (u.hostname.includes('youtube.com')) {
+      if (u.pathname.startsWith('/live/')) {
+        return u.pathname.split('/')[2] || null;
+      }
       return u.searchParams.get('v');
     }
   } catch {
@@ -119,8 +142,8 @@ if (typeof document !== 'undefined') {
     if (!stored) {
       setStatus('No API key stored. Visit the settings page to configure one.');
     }
-    document.getElementById('summarize').addEventListener('click', async () => {
-      const url = document.getElementById('url').value;
+      document.getElementById('summarize').addEventListener('click', async () => {
+        const url = stripTracking(document.getElementById('url').value);
       const summaryEl = document.getElementById('summary');
       summaryEl.innerHTML = '';
       if (logEl) logEl.textContent = '';
