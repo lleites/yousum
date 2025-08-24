@@ -2,6 +2,14 @@
 
 This project is a self-contained GitHub Pages site that summarizes the transcript of a YouTube video using the Groq API. Provide a YouTube URL and your Groq API key to generate a short summary and bullet-point conclusions.
 
+## Features
+
+- **End‑to‑end transcript summarization:** Fetches the full transcript from YouTube via `youtubetotranscript.com` and generates a concise summary with Groq's `openai/gpt-oss-120b` model.
+- **Ask follow‑up questions:** After summarizing, pose additional questions about the transcript and receive answers powered by the same model.
+- **Encrypted API key storage:** Stores your Groq API key in IndexedDB encrypted with a PIN using the Web Crypto API.
+- **Persistent history:** Saves past summaries in local storage so you can revisit, delete, or ask questions about them later.
+- **No build step:** Pure HTML/JS/CSS site that runs entirely in the browser with a small automated test suite.
+
 ## Usage
 1. Open `settings.html` to configure the Groq API key. Enter the key and choose a PIN, then save it.
 2. (Optional) Use the **Decrypt stored key** button on the settings page to authenticate and verify the stored key by entering your PIN.
