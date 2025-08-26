@@ -8,11 +8,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <nav>
-      <a href="index.html">📝 Sum</a>
-      <a href="history.html">📜 History</a>
-      <a href="settings.html">⚙️ Settings</a>
-    </nav>
+    <nav></nav>
     <h1>YouTube Video Summarizer</h1>
     <p>Enter a YouTube URL to summarize its transcript. Configure your Groq API key and PIN on the <a href="settings.html">settings page</a>.</p>
     <input type="text" id="url" placeholder="YouTube URL">
@@ -26,12 +22,13 @@
     <div id="summary"></div>
 
     <h2>Ask Transcript</h2>
-    <div id="askSection">
+    <div id="askSection" class="hidden">
       <input type="text" id="question" placeholder="Ask a question">
       <button id="ask">Ask</button>
       <div id="answer"></div>
     </div>
 
+    <script type="module" src="nav.js"></script>
     <script src="errors.js"></script>
     <script type="module" src="main.js"></script>
 </body>

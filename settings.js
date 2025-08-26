@@ -39,11 +39,11 @@ if (typeof document !== 'undefined') {
 
     const stored = await getKeyRecord();
     if (stored) {
-      apiInput.style.display = 'none';
-      pinInput.style.display = 'none';
-      saveBtn.style.display = 'none';
-      decryptBtn.style.display = 'inline';
-      resetBtn.style.display = 'inline';
+      apiInput.classList.add('hidden');
+      pinInput.classList.add('hidden');
+      saveBtn.classList.add('hidden');
+      decryptBtn.classList.remove('hidden');
+      resetBtn.classList.remove('hidden');
       setStatus('API key stored.');
     }
 
@@ -59,11 +59,11 @@ if (typeof document !== 'undefined') {
         await encryptAndStoreKey(key, pin);
         apiInput.value = '';
         pinInput.value = '';
-        apiInput.style.display = 'none';
-        pinInput.style.display = 'none';
-        saveBtn.style.display = 'none';
-        decryptBtn.style.display = 'inline';
-        resetBtn.style.display = 'inline';
+        apiInput.classList.add('hidden');
+        pinInput.classList.add('hidden');
+        saveBtn.classList.add('hidden');
+        decryptBtn.classList.remove('hidden');
+        resetBtn.classList.remove('hidden');
         setStatus('API key saved.');
       } catch (e) {
         showError(e.message);
@@ -87,11 +87,11 @@ if (typeof document !== 'undefined') {
 
     resetBtn.addEventListener('click', async () => {
       await clearStorage();
-      apiInput.style.display = 'inline';
-      pinInput.style.display = 'inline';
-      saveBtn.style.display = 'inline';
-      decryptBtn.style.display = 'none';
-      resetBtn.style.display = 'none';
+      apiInput.classList.remove('hidden');
+      pinInput.classList.remove('hidden');
+      saveBtn.classList.remove('hidden');
+      decryptBtn.classList.add('hidden');
+      resetBtn.classList.add('hidden');
       setStatus('Stored key cleared.');
     });
   });

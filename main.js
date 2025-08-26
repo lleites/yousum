@@ -101,7 +101,7 @@ if (typeof document !== 'undefined') {
     const questionEl = document.getElementById('question');
     const askBtn = document.getElementById('ask');
     const answerEl = document.getElementById('answer');
-    if (askSection) askSection.style.display = 'none';
+    if (askSection) askSection.classList.add('hidden');
     let lastTranscript = '';
     let currentApiKey = '';
     if (askBtn) {
@@ -146,7 +146,7 @@ if (typeof document !== 'undefined') {
         lastTranscript = transcript;
         currentApiKey = apiKey;
         if (askSection) {
-          askSection.style.display = '';
+          askSection.classList.remove('hidden');
           answerEl.innerHTML = '';
           questionEl.value = '';
         }
@@ -158,4 +158,3 @@ if (typeof document !== 'undefined') {
   });
 }
 /* c8 ignore end */
-

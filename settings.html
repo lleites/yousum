@@ -8,11 +8,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <nav>
-      <a href="index.html">📝 Sum</a>
-      <a href="history.html">📜 History</a>
-      <a href="settings.html">⚙️ Settings</a>
-    </nav>
+    <nav></nav>
     <h1>Settings</h1>
     <p>Use this page to configure the Groq API key and set up PIN protection.</p>
     <ol>
@@ -23,14 +19,15 @@
     <input type="text" id="apiKey" placeholder="Groq API Key">
     <input type="password" id="pin" placeholder="PIN">
     <button id="saveKey">Save API Key</button>
-    <button id="decryptKey" style="display:none;">Decrypt stored key</button>
-    <button id="resetKey" style="display:none;">Reset API Key</button>
+    <button id="decryptKey" class="hidden">Decrypt stored key</button>
+    <button id="resetKey" class="hidden">Reset API Key</button>
     <div id="status"></div>
     <details id="logBox">
       <summary>Log</summary>
       <pre id="log"></pre>
     </details>
 
+    <script type="module" src="nav.js"></script>
     <script type="module" src="settings.js"></script>
 </body>
 </html>
