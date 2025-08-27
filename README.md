@@ -8,6 +8,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 - **Ask follow‑up questions:** After summarizing, pose additional questions about the transcript and receive answers powered by the same model.
 - **Encrypted API key storage:** Stores your Groq API key in IndexedDB encrypted with a PIN using the Web Crypto API.
 - **Persistent history:** Saves past summaries in local storage so you can revisit, delete, or ask questions about them later.
+- **History export/import:** Export all history to a timestamped JSON file and import it back from the settings page; duplicate videos are skipped based on URL.
 - **No build step:** Pure HTML/JS/CSS site that runs entirely in the browser with a small automated test suite.
 
 ## Usage
@@ -16,6 +17,10 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 3. Navigate to `index.html` (or the deployed GitHub Pages site).
 4. Enter the YouTube video URL and click **Summarize**. You will be prompted for your PIN to decrypt the stored API key before the summary is generated.
 5. To remove or change the key later, return to the settings page and use **Reset API Key**.
+
+### Export/Import History
+- Open `settings.html` and use **Export History (JSON)** to download a file named like `yousum-YYYYMMDD-HHMMSS.json`.
+- Use **Import History (JSON)** to select a previously exported file. Items with URLs already in your history are ignored.
 
 ## Notes
 - The transcript is fetched from `youtubetotranscript.com`. If a transcript is unavailable or the request fails, an error will be shown.

@@ -1,5 +1,6 @@
 /* c8 ignore file */
 import { encryptAndStoreKey, decryptStoredKey, getKeyRecord, clearStorage } from './keyManager.js';
+import { loadHistory, mergeHistory } from './historyManager.js';
 
 function showError(message) {
   const status = document.getElementById('status');
@@ -94,5 +95,47 @@ if (typeof document !== 'undefined') {
       resetBtn.classList.add('hidden');
       setStatus('Stored key cleared.');
     });
+
+    const exportBtn = document.getElementById('exportHistory');
+    const importBtn = document.getElementById('importHistory');
+    const fileInput = document.getElementById('importFile');
+
+    if (exportBtn) {
+      exportBtn.addEventListener('click', () => {
+        const items = loadHistory();
+        const data = JSON.stringify(items, null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const name = `yousum-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.json`;
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        setStatus('History exported.');
+      });
+    }
+
+    if (importBtn && fileInput) {
+      importBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', async () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const entries = JSON.parse(text);
+          const { added, total } = mergeHistory(Array.isArray(entries) ? entries : []);
+          setStatus(`Imported ${added} new item(s). Total: ${total}.`);
+        } catch (e) {
+          showError(e.message || 'Invalid file');
+        } finally {
+          fileInput.value = '';
+        }
+      });
+    }
   });
 }

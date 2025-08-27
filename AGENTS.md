@@ -36,6 +36,10 @@
 - PRs: include summary, rationale, screenshots for UI changes, and linked issues. Ensure `npm test` passes and coverage thresholds met.
 - Scope: keep PRs small and single-purpose; include tests for new behavior and edge cases.
 
+## Documentation Updates
+
+- When adding or changing features, update `README.md` to reflect the new behavior. At minimum, adjust the Features list and any relevant Usage notes.
+
 ## Security & Configuration
 
 - Do not commit API keys. Configure via the settings page; stored keys are encrypted by the app.

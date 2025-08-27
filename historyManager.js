@@ -28,3 +28,21 @@ export function deleteHistory(index) {
     // ignore storage errors
   }
 }
+
+export function mergeHistory(entries) {
+  if (!Array.isArray(entries) || !entries.length) return { added: 0, total: loadHistory().length };
+  const existing = loadHistory();
+  const seen = new Set(existing.map(e => e && e.url));
+  let added = 0;
+  for (const entry of entries) {
+    const url = entry && entry.url;
+    if (!url || seen.has(url)) continue;
+    existing.push(entry);
+    seen.add(url);
+    added++;
+  }
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(existing));
+  } catch {}
+  return { added, total: existing.length };
+}
