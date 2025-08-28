@@ -1,20 +1,72 @@
-/* c8 ignore file */
 import { encryptAndStoreKey, decryptStoredKey, getKeyRecord, clearStorage } from './keyManager.js';
 import { loadHistory, mergeHistory } from './historyManager.js';
 
+export function generateHistoryExport(items, now = new Date()) {
+  const data = JSON.stringify(items, null, 2);
+  const pad = n => String(n).padStart(2, '0');
+  const name = `yousum-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.json`;
+  return { data, name };
+}
+
+export function importHistoryText(text, mergeFn = mergeHistory) {
+  const entries = JSON.parse(text);
+  return mergeFn(Array.isArray(entries) ? entries : []);
+}
+
+export async function saveApiKey(apiInput, pinInput, saveBtn, decryptBtn, resetBtn, setStatus, encryptFn = encryptAndStoreKey) {
+  const key = apiInput.value.trim();
+  const pin = pinInput.value;
+  if (!key || !pin) {
+    setStatus('Please enter an API key and PIN.');
+    return;
+  }
+  await encryptFn(key, pin);
+  apiInput.value = '';
+  pinInput.value = '';
+  apiInput.classList.add('hidden');
+  pinInput.classList.add('hidden');
+  saveBtn.classList.add('hidden');
+  decryptBtn.classList.remove('hidden');
+  resetBtn.classList.remove('hidden');
+  setStatus('API key saved.');
+}
+
+export async function decryptApiKey(decryptFn, promptForPinFn, setStatus) {
+  const pin = await promptForPinFn('Enter PIN');
+  if (!pin) {
+    setStatus('PIN required.');
+    return;
+  }
+  setStatus('Authenticating...');
+  await decryptFn(pin);
+  setStatus('API key successfully decrypted.');
+}
+
+export async function resetApiKey(apiInput, pinInput, saveBtn, decryptBtn, resetBtn, setStatus, clearFn = clearStorage) {
+  await clearFn();
+  apiInput.classList.remove('hidden');
+  pinInput.classList.remove('hidden');
+  saveBtn.classList.remove('hidden');
+  decryptBtn.classList.add('hidden');
+  resetBtn.classList.add('hidden');
+  setStatus('Stored key cleared.');
+}
+
+/* c8 ignore start */
 function showError(message) {
   const status = document.getElementById('status');
   const logEl = document.getElementById('log');
   if (status) status.textContent = 'Error: ' + message;
   if (logEl) logEl.textContent += 'Error: ' + message + '\n';
 }
-
-window.addEventListener('error', (e) => showError(e.error?.message || e.message));
-window.addEventListener('unhandledrejection', (e) => {
-  e.preventDefault();
-  const msg = e.reason?.message || e.reason;
-  showError(msg);
-});
+if (typeof window !== 'undefined') {
+  window.addEventListener('error', (e) => showError(e.error?.message || e.message));
+  window.addEventListener('unhandledrejection', (e) => {
+    e.preventDefault();
+    const msg = e.reason?.message || e.reason;
+    showError(msg);
+  });
+}
 
 if (typeof window !== 'undefined' && window.trustedTypes && !window.trustedTypes.defaultPolicy) {
   window.trustedTypes.createPolicy('default', {
@@ -23,6 +75,7 @@ if (typeof window !== 'undefined' && window.trustedTypes && !window.trustedTypes
     createScriptURL: s => s
   });
 }
+/* c8 ignore end */
 
 if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', async () => {
@@ -49,23 +102,9 @@ if (typeof document !== 'undefined') {
     }
 
     saveBtn.addEventListener('click', async () => {
-      const key = apiInput.value.trim();
-      const pin = pinInput.value;
-      if (!key || !pin) {
-        setStatus('Please enter an API key and PIN.');
-        return;
-      }
       try {
         setStatus('Saving key...');
-        await encryptAndStoreKey(key, pin);
-        apiInput.value = '';
-        pinInput.value = '';
-        apiInput.classList.add('hidden');
-        pinInput.classList.add('hidden');
-        saveBtn.classList.add('hidden');
-        decryptBtn.classList.remove('hidden');
-        resetBtn.classList.remove('hidden');
-        setStatus('API key saved.');
+        await saveApiKey(apiInput, pinInput, saveBtn, decryptBtn, resetBtn, setStatus);
       } catch (e) {
         showError(e.message);
       }
@@ -79,28 +118,15 @@ if (typeof document !== 'undefined') {
 
     decryptBtn.addEventListener('click', async () => {
       const { promptForPin } = await import('./pinPrompt.js');
-      const pin = await promptForPin('Enter PIN');
-      if (!pin) {
-        setStatus('PIN required.');
-        return;
-      }
       try {
-        setStatus('Authenticating...');
-        await decryptStoredKey(pin);
-        setStatus('API key successfully decrypted.');
+        await decryptApiKey(decryptStoredKey, promptForPin, setStatus);
       } catch (e) {
         showError(e.message);
       }
     });
 
     resetBtn.addEventListener('click', async () => {
-      await clearStorage();
-      apiInput.classList.remove('hidden');
-      pinInput.classList.remove('hidden');
-      saveBtn.classList.remove('hidden');
-      decryptBtn.classList.add('hidden');
-      resetBtn.classList.add('hidden');
-      setStatus('Stored key cleared.');
+      await resetApiKey(apiInput, pinInput, saveBtn, decryptBtn, resetBtn, setStatus);
     });
 
     const exportBtn = document.getElementById('exportHistory');
@@ -110,13 +136,10 @@ if (typeof document !== 'undefined') {
     if (exportBtn) {
       exportBtn.addEventListener('click', () => {
         const items = loadHistory();
-        const data = JSON.stringify(items, null, 2);
+        const { data, name } = generateHistoryExport(items);
         const blob = new Blob([data], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        const now = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        const name = `yousum-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.json`;
         a.href = url;
         a.download = name;
         document.body.appendChild(a);
@@ -134,8 +157,7 @@ if (typeof document !== 'undefined') {
         if (!file) return;
         try {
           const text = await file.text();
-          const entries = JSON.parse(text);
-          const { added, total } = mergeHistory(Array.isArray(entries) ? entries : []);
+          const { added, total } = importHistoryText(text, mergeHistory);
           setStatus(`Imported ${added} new item(s). Total: ${total}.`);
         } catch (e) {
           showError(e.message || 'Invalid file');

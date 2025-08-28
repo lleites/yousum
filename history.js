@@ -4,6 +4,23 @@ import { summarizeNews } from './api.js';
 import { askTranscript } from './api.js';
 import { getKeyRecord, decryptStoredKey } from './keyManager.js';
 
+export function selectRecent(items, limit = 20) {
+  return [...items]
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
+    .slice(0, limit);
+}
+
+export function calculatePeriod(items) {
+  if (!items.length) return { startStr: '', endStr: '' };
+  const times = items.map(it => new Date(it.createdAt).getTime());
+  const start = Math.min(...times);
+  const end = Math.max(...times);
+  return {
+    startStr: new Date(start).toISOString().slice(0, 10),
+    endStr: new Date(end).toISOString().slice(0, 10)
+  };
+}
+
 /* c8 ignore start */
 if (typeof window !== 'undefined' && window.trustedTypes && !window.trustedTypes.defaultPolicy) {
   window.trustedTypes.createPolicy('default', {
@@ -35,20 +52,12 @@ if (typeof document !== 'undefined') {
         e.preventDefault();
         newsOut.textContent = '';
         newsPeriod.textContent = '';
-        const sorted = [...items].sort((a, b) => {
-          const da = new Date(a.createdAt || 0).getTime();
-          const db = new Date(b.createdAt || 0).getTime();
-          return db - da;
-        });
-        const selected = sorted.slice(0, 20);
+        const selected = selectRecent(items);
         if (!selected.length) {
           newsOut.textContent = 'No items to summarize.';
           return;
         }
-        const start = selected.reduce((min, it) => Math.min(min, new Date(it.createdAt).getTime()), Infinity);
-        const end = selected.reduce((max, it) => Math.max(max, new Date(it.createdAt).getTime()), -Infinity);
-        const startStr = new Date(start).toISOString().slice(0, 10);
-        const endStr = new Date(end).toISOString().slice(0, 10);
+        const { startStr, endStr } = calculatePeriod(selected);
         newsOut.textContent = 'Summarizing...';
         try {
           if (!apiKey) {
