@@ -105,11 +105,21 @@ if (typeof document !== 'undefined') {
     const answerEl = document.getElementById('answer');
     const log = msg => { if (logEl) logEl.textContent += msg + '\n'; };
     const setStatus = msg => { status.textContent = msg; log(msg); };
-    if (logBox) logBox.classList.add('hidden');
-    if (summaryHeader) summaryHeader.classList.add('hidden');
-    if (summaryEl) summaryEl.classList.add('hidden');
-    if (askHeader) askHeader.classList.add('hidden');
-    if (askSection) askSection.classList.add('hidden');
+    const hideInitialSections = () => {
+      [logBox, summaryHeader, summaryEl, askHeader, askSection].forEach(el => {
+        if (el) el.classList.add('hidden');
+      });
+    };
+    const showSectionAfterSummary = () => {
+      [logBox, summaryHeader, summaryEl, askHeader, askSection].forEach(el => {
+        if (el) el.classList.remove('hidden');
+      });
+      if (askSection) {
+        answerEl.innerHTML = '';
+        questionEl.value = '';
+      }
+    };
+    hideInitialSections();
     let lastTranscript = '';
     let currentApiKey = '';
     let keyClearTimer;
@@ -180,19 +190,11 @@ if (typeof document !== 'undefined') {
         setStatus(`Summarizing "${title}"...`);
         const summary = await summarize(transcript, apiKey);
         summaryEl.innerHTML = renderMarkdown(summary);
-        if (logBox) logBox.classList.remove('hidden');
-        if (summaryHeader) summaryHeader.classList.remove('hidden');
-        if (summaryEl) summaryEl.classList.remove('hidden');
+        showSectionAfterSummary();
         addHistory({ title, channel, url, summary, transcript, createdAt: new Date().toISOString() });
         lastTranscript = transcript;
         currentApiKey = apiKey;
         scheduleKeyClear();
-        if (askSection) {
-          askSection.classList.remove('hidden');
-          answerEl.innerHTML = '';
-          questionEl.value = '';
-        }
-        if (askHeader) askHeader.classList.remove('hidden');
         setStatus('Done.');
       } catch (e) {
         setStatus('Error: ' + e.message);
