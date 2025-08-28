@@ -173,7 +173,7 @@ if (typeof document !== 'undefined') {
         setStatus(`Summarizing "${title}"...`);
         const summary = await summarize(transcript, apiKey);
         summaryEl.innerHTML = renderMarkdown(summary);
-        addHistory({ title, channel, url, summary, transcript });
+        addHistory({ title, channel, url, summary, transcript, createdAt: new Date().toISOString() });
         lastTranscript = transcript;
         currentApiKey = apiKey;
         scheduleKeyClear();

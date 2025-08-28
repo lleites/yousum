@@ -3,7 +3,11 @@ const HISTORY_KEY = 'yousum-history';
 export function loadHistory() {
   try {
     const raw = localStorage.getItem(HISTORY_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    const fallback = '2025-08-01T00:00:00.000Z';
+    return Array.isArray(parsed)
+      ? parsed.map(e => ({ ...e, createdAt: e && e.createdAt ? e.createdAt : fallback }))
+      : [];
   } catch {
     return [];
   }

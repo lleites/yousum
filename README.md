@@ -8,6 +8,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 - **Ask follow‑up questions:** After summarizing, pose additional questions about the transcript and receive answers powered by the same model.
 - **Encrypted API key storage:** Stores your Groq API key in IndexedDB encrypted with a PIN using the Web Crypto API.
 - **Persistent history:** Saves past summaries in local storage so you can revisit, delete, or ask questions about them later.
+- **News synthesis from history:** On the History page, aggregate the latest 20 summaries into a concise overview with the covered period and source attributions per key point.
 - **History export/import:** Export all history to a timestamped JSON file and import it back from the settings page; duplicate videos are skipped based on URL.
 - **No build step:** Pure HTML/JS/CSS site that runs entirely in the browser with a small automated test suite.
 
@@ -17,6 +18,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 3. Navigate to `index.html` (or the deployed GitHub Pages site).
 4. Enter the YouTube video URL and click **Summarize**. You will be prompted for your PIN to decrypt the stored API key before the summary is generated.
 5. To remove or change the key later, return to the settings page and use **Reset API Key**.
+6. Open `history.html` and click **Summarize recent news (latest 20)** to generate an aggregated overview across your most recent items; the app shows the period covered and the output cites which videos support each point.
 
 ### Export/Import History
 - Open `settings.html` and use **Export History (JSON)** to download a file named like `yousum-YYYYMMDD-HHMMSS.json`.
@@ -27,6 +29,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 - Summaries are generated via the `openai/gpt-oss-120b` chat completion endpoint provided by Groq.
 - The `openai/gpt-oss-120b` model offers a large context window, so the app sends the full transcript without calculating token limits.
 - The summarization prompt lives in `summaryPrompt.md`, and the Q&A prompt in `qaPrompt.md`; edit them to change the styles.
+- The cross‑video news prompt lives in `newsSummaryPrompt.md`.
 - Secure key storage uses the Web Crypto API to encrypt the API key with a PIN you choose.
 
 ## Development

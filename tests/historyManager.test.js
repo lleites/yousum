@@ -63,3 +63,13 @@ test('mergeHistory handles empty or invalid input', () => {
   assert.equal(r3.added, 0);
   global.localStorage = originalStorage;
 });
+
+test('loadHistory adds createdAt fallback for legacy entries', () => {
+  global.localStorage = new FakeStorage();
+  global.localStorage.setItem('yousum-history', JSON.stringify([
+    { title: 'old', channel: 'c', url: 'u', summary: 's' }
+  ]));
+  const items = loadHistory();
+  assert.equal(items[0].createdAt, '2025-08-01T00:00:00.000Z');
+  global.localStorage = originalStorage;
+});

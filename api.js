@@ -68,3 +68,40 @@ export async function askTranscript(transcript, question, apiKey) {
   const json = await res.json();
   return json.choices[0].message.content.trim();
 }
+
+export async function summarizeNews(items, apiKey) {
+  const promptRes = await fetch('newsSummaryPrompt.md');
+  if (!promptRes.ok) throw new Error('Prompt not found');
+  const prompt = await promptRes.text();
+  const body = items
+    .map((it, idx) => {
+      const date = it.createdAt || '';
+      const title = it.title || '';
+      const channel = it.channel || '';
+      const url = it.url || '';
+      const summary = it.summary || '';
+      return `#${idx + 1} | ${date} | ${title} — ${channel} | ${url}\n${summary}`;
+    })
+    .join('\n\n');
+  const res = await fetchWithRetry('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'openai/gpt-oss-120b',
+      max_completion_tokens: 8192,
+      messages: [
+        { role: 'system', content: prompt },
+        { role: 'user', content: body }
+      ]
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err);
+  }
+  const json = await res.json();
+  return json.choices[0].message.content.trim();
+}

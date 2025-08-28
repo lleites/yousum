@@ -1,5 +1,6 @@
 import { loadHistory, deleteHistory } from './historyManager.js';
 import { renderMarkdown } from './render.js';
+import { summarizeNews } from './api.js';
 import { askTranscript } from './api.js';
 import { getKeyRecord, decryptStoredKey } from './keyManager.js';
 
@@ -16,6 +17,9 @@ if (typeof document !== 'undefined') {
   const init = () => {
     const list = document.getElementById('historyList');
     const items = loadHistory();
+    const newsBtn = document.getElementById('summarizeNews');
+    const newsOut = document.getElementById('newsSummary');
+    const newsPeriod = document.getElementById('newsPeriod');
     let apiKey;
     let keyClearTimer;
     const scheduleKeyClear = () => {
@@ -26,6 +30,46 @@ if (typeof document !== 'undefined') {
       if (document.hidden) apiKey = undefined;
     });
     window.addEventListener('beforeunload', () => { apiKey = undefined; });
+    if (newsBtn) {
+      newsBtn.addEventListener('click', async e => {
+        e.preventDefault();
+        newsOut.textContent = '';
+        newsPeriod.textContent = '';
+        const sorted = [...items].sort((a, b) => {
+          const da = new Date(a.createdAt || 0).getTime();
+          const db = new Date(b.createdAt || 0).getTime();
+          return db - da;
+        });
+        const selected = sorted.slice(0, 20);
+        if (!selected.length) {
+          newsOut.textContent = 'No items to summarize.';
+          return;
+        }
+        const start = selected.reduce((min, it) => Math.min(min, new Date(it.createdAt).getTime()), Infinity);
+        const end = selected.reduce((max, it) => Math.max(max, new Date(it.createdAt).getTime()), -Infinity);
+        const startStr = new Date(start).toISOString().slice(0, 10);
+        const endStr = new Date(end).toISOString().slice(0, 10);
+        newsOut.textContent = 'Summarizing...';
+        try {
+          if (!apiKey) {
+            const record = await getKeyRecord();
+            if (!record) throw new Error('No stored API key. Use the settings page.');
+            const { promptForPin } = await import('./pinPrompt.js');
+            const pin = await promptForPin('Enter PIN');
+            if (!pin) throw new Error('PIN required');
+            apiKey = await decryptStoredKey(pin);
+          }
+          let result = await summarizeNews(selected, apiKey);
+          result = result.replace(/^(\s*Period:[^\n]*\n?)+/i, '').trim();
+          newsPeriod.textContent = `Period: ${startStr} – ${endStr} (${selected.length} videos)`;
+          newsOut.innerHTML = renderMarkdown(result);
+          scheduleKeyClear();
+        } catch (err) {
+          newsOut.textContent = 'Error: ' + err.message;
+        }
+      });
+    }
+
     if (!items.length) {
       const li = document.createElement('li');
       li.textContent = 'No history yet.';
