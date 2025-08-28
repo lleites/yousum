@@ -95,13 +95,31 @@ if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', async () => {
     const status = document.getElementById('status');
     const logEl = document.getElementById('log');
-    const log = msg => { if (logEl) logEl.textContent += msg + '\n'; };
-    const setStatus = msg => { status.textContent = msg; log(msg); };
+    const logBox = document.getElementById('logBox');
+    const summaryHeader = document.getElementById('summary-heading');
+    const summaryEl = document.getElementById('summary');
+    const askHeader = document.getElementById('ask-heading');
     const askSection = document.getElementById('askSection');
     const questionEl = document.getElementById('question');
     const askBtn = document.getElementById('ask');
     const answerEl = document.getElementById('answer');
-    if (askSection) askSection.classList.add('hidden');
+    const log = msg => { if (logEl) logEl.textContent += msg + '\n'; };
+    const setStatus = msg => { status.textContent = msg; log(msg); };
+    const hideInitialSections = () => {
+      [logBox, summaryHeader, summaryEl, askHeader, askSection].forEach(el => {
+        if (el) el.classList.add('hidden');
+      });
+    };
+    const showSectionAfterSummary = () => {
+      [logBox, summaryHeader, summaryEl, askHeader, askSection].forEach(el => {
+        if (el) el.classList.remove('hidden');
+      });
+      if (askSection) {
+        answerEl.innerHTML = '';
+        questionEl.value = '';
+      }
+    };
+    hideInitialSections();
     let lastTranscript = '';
     let currentApiKey = '';
     let keyClearTimer;
@@ -152,7 +170,6 @@ if (typeof document !== 'undefined') {
     }
       document.getElementById('summarize').addEventListener('click', async () => {
         const url = stripTracking(document.getElementById('url').value);
-      const summaryEl = document.getElementById('summary');
       summaryEl.innerHTML = '';
       if (logEl) logEl.textContent = '';
       try {
@@ -173,15 +190,11 @@ if (typeof document !== 'undefined') {
         setStatus(`Summarizing "${title}"...`);
         const summary = await summarize(transcript, apiKey);
         summaryEl.innerHTML = renderMarkdown(summary);
+        showSectionAfterSummary();
         addHistory({ title, channel, url, summary, transcript, createdAt: new Date().toISOString() });
         lastTranscript = transcript;
         currentApiKey = apiKey;
         scheduleKeyClear();
-        if (askSection) {
-          askSection.classList.remove('hidden');
-          answerEl.innerHTML = '';
-          questionEl.value = '';
-        }
         setStatus('Done.');
       } catch (e) {
         setStatus('Error: ' + e.message);
