@@ -17,6 +17,15 @@ if (typeof document !== 'undefined') {
     const list = document.getElementById('historyList');
     const items = loadHistory();
     let apiKey;
+    let keyClearTimer;
+    const scheduleKeyClear = () => {
+      if (keyClearTimer) clearTimeout(keyClearTimer);
+      keyClearTimer = setTimeout(() => { apiKey = undefined; }, 120000);
+    };
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) apiKey = undefined;
+    });
+    window.addEventListener('beforeunload', () => { apiKey = undefined; });
     if (!items.length) {
       const li = document.createElement('li');
       li.textContent = 'No history yet.';
@@ -96,6 +105,7 @@ if (typeof document !== 'undefined') {
           answer.textContent = 'Asking...';
           const ans = await askTranscript(item.transcript, q, apiKey);
           answer.innerHTML = renderMarkdown(ans);
+          scheduleKeyClear();
         } catch (err) {
           answer.textContent = 'Error: ' + err.message;
         }
@@ -112,4 +122,3 @@ if (typeof document !== 'undefined') {
   }
 }
 /* c8 ignore end */
-

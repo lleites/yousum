@@ -67,7 +67,7 @@ async function deriveKey(pin, salt) {
   const enc = new TextEncoder().encode(pin);
   const baseKey = await crypto.subtle.importKey('raw', enc, 'PBKDF2', false, ['deriveKey']);
   return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    { name: 'PBKDF2', salt, iterations: 300000, hash: 'SHA-256' },
     baseKey,
     { name: 'AES-GCM', length: 256 },
     false,
@@ -105,4 +105,3 @@ export async function decryptStoredKey(pin) {
   }
   return new TextDecoder().decode(decrypted);
 }
-

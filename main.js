@@ -104,15 +104,33 @@ if (typeof document !== 'undefined') {
     if (askSection) askSection.classList.add('hidden');
     let lastTranscript = '';
     let currentApiKey = '';
+    let keyClearTimer;
+    const scheduleKeyClear = () => {
+      if (keyClearTimer) clearTimeout(keyClearTimer);
+      keyClearTimer = setTimeout(() => { currentApiKey = ''; }, 120000);
+    };
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) currentApiKey = '';
+    });
+    window.addEventListener('beforeunload', () => { currentApiKey = ''; });
     if (askBtn) {
       askBtn.addEventListener('click', async () => {
         const q = questionEl.value.trim();
         if (!q) return;
         try {
+          if (!currentApiKey) {
+            const record = await getKeyRecord();
+            if (!record) throw new Error('No stored API key. Use the settings page.');
+            const pin = prompt('Enter PIN');
+            if (!pin) throw new Error('PIN required');
+            setStatus('Authenticating...');
+            currentApiKey = await decryptStoredKey(pin);
+          }
           setStatus('Asking...');
           const ans = await askTranscript(lastTranscript, q, currentApiKey);
           answerEl.innerHTML = renderMarkdown(ans);
           setStatus('Done.');
+          scheduleKeyClear();
         } catch (e) {
           setStatus('Error: ' + e.message);
         }
@@ -129,12 +147,15 @@ if (typeof document !== 'undefined') {
       summaryEl.innerHTML = '';
       if (logEl) logEl.textContent = '';
       try {
-        const record = await getKeyRecord();
-        if (!record) throw new Error('No stored API key. Use the settings page.');
-        const pin = prompt('Enter PIN');
-        if (!pin) throw new Error('PIN required');
-        setStatus('Authenticating...');
-        const apiKey = await decryptStoredKey(pin);
+        let apiKey = currentApiKey;
+        if (!apiKey) {
+          const record = await getKeyRecord();
+          if (!record) throw new Error('No stored API key. Use the settings page.');
+          const pin = prompt('Enter PIN');
+          if (!pin) throw new Error('PIN required');
+          setStatus('Authenticating...');
+          apiKey = await decryptStoredKey(pin);
+        }
         setStatus('Fetching transcript...');
         const videoId = parseVideoId(url);
         if (!videoId) throw new Error('Invalid URL');
@@ -145,6 +166,7 @@ if (typeof document !== 'undefined') {
         addHistory({ title, channel, url, summary, transcript });
         lastTranscript = transcript;
         currentApiKey = apiKey;
+        scheduleKeyClear();
         if (askSection) {
           askSection.classList.remove('hidden');
           answerEl.innerHTML = '';
