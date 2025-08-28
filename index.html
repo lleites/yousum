@@ -14,14 +14,14 @@
     <input type="text" id="url" placeholder="YouTube URL">
     <button id="summarize">Summarize</button>
     <div id="status"></div>
-    <details id="logBox">
+    <details id="logBox" class="hidden">
       <summary>Log</summary>
       <pre id="log"></pre>
     </details>
-    <h2>Summary</h2>
-    <div id="summary"></div>
+    <h2 id="summary-heading" class="hidden">Summary</h2>
+    <div id="summary" class="hidden"></div>
 
-    <h2>Ask Transcript</h2>
+    <h2 id="ask-heading" class="hidden">Ask Transcript</h2>
     <div id="askSection" class="hidden">
       <input type="text" id="question" placeholder="Ask a question">
       <button id="ask">Ask</button>

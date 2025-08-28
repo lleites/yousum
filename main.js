@@ -95,12 +95,20 @@ if (typeof document !== 'undefined') {
   document.addEventListener('DOMContentLoaded', async () => {
     const status = document.getElementById('status');
     const logEl = document.getElementById('log');
-    const log = msg => { if (logEl) logEl.textContent += msg + '\n'; };
-    const setStatus = msg => { status.textContent = msg; log(msg); };
+    const logBox = document.getElementById('logBox');
+    const summaryHeader = document.getElementById('summary-heading');
+    const summaryEl = document.getElementById('summary');
+    const askHeader = document.getElementById('ask-heading');
     const askSection = document.getElementById('askSection');
     const questionEl = document.getElementById('question');
     const askBtn = document.getElementById('ask');
     const answerEl = document.getElementById('answer');
+    const log = msg => { if (logEl) logEl.textContent += msg + '\n'; };
+    const setStatus = msg => { status.textContent = msg; log(msg); };
+    if (logBox) logBox.classList.add('hidden');
+    if (summaryHeader) summaryHeader.classList.add('hidden');
+    if (summaryEl) summaryEl.classList.add('hidden');
+    if (askHeader) askHeader.classList.add('hidden');
     if (askSection) askSection.classList.add('hidden');
     let lastTranscript = '';
     let currentApiKey = '';
@@ -152,7 +160,6 @@ if (typeof document !== 'undefined') {
     }
       document.getElementById('summarize').addEventListener('click', async () => {
         const url = stripTracking(document.getElementById('url').value);
-      const summaryEl = document.getElementById('summary');
       summaryEl.innerHTML = '';
       if (logEl) logEl.textContent = '';
       try {
@@ -173,6 +180,9 @@ if (typeof document !== 'undefined') {
         setStatus(`Summarizing "${title}"...`);
         const summary = await summarize(transcript, apiKey);
         summaryEl.innerHTML = renderMarkdown(summary);
+        if (logBox) logBox.classList.remove('hidden');
+        if (summaryHeader) summaryHeader.classList.remove('hidden');
+        if (summaryEl) summaryEl.classList.remove('hidden');
         addHistory({ title, channel, url, summary, transcript, createdAt: new Date().toISOString() });
         lastTranscript = transcript;
         currentApiKey = apiKey;
@@ -182,6 +192,7 @@ if (typeof document !== 'undefined') {
           answerEl.innerHTML = '';
           questionEl.value = '';
         }
+        if (askHeader) askHeader.classList.remove('hidden');
         setStatus('Done.');
       } catch (e) {
         setStatus('Error: ' + e.message);
