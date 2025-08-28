@@ -90,6 +90,12 @@ if (typeof document !== 'undefined') {
       askWrap.appendChild(askBtn);
       askWrap.appendChild(answer);
       details.appendChild(askWrap);
+      qInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          askBtn.click();
+        }
+      });
       askBtn.addEventListener('click', async e => {
         e.preventDefault();
         const q = qInput.value.trim();
@@ -98,7 +104,8 @@ if (typeof document !== 'undefined') {
           if (!apiKey) {
             const record = await getKeyRecord();
             if (!record) throw new Error('No stored API key. Use the settings page.');
-            const pin = prompt('Enter PIN');
+            const { promptForPin } = await import('./pinPrompt.js');
+            const pin = await promptForPin('Enter PIN');
             if (!pin) throw new Error('PIN required');
             apiKey = await decryptStoredKey(pin);
           }

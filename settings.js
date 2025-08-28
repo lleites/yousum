@@ -70,9 +70,16 @@ if (typeof document !== 'undefined') {
         showError(e.message);
       }
     });
+    apiInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !saveBtn.classList.contains('hidden')) saveBtn.click();
+    });
+    pinInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !saveBtn.classList.contains('hidden')) saveBtn.click();
+    });
 
     decryptBtn.addEventListener('click', async () => {
-      const pin = prompt('Enter PIN');
+      const { promptForPin } = await import('./pinPrompt.js');
+      const pin = await promptForPin('Enter PIN');
       if (!pin) {
         setStatus('PIN required.');
         return;

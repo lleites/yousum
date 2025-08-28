@@ -121,7 +121,8 @@ if (typeof document !== 'undefined') {
           if (!currentApiKey) {
             const record = await getKeyRecord();
             if (!record) throw new Error('No stored API key. Use the settings page.');
-            const pin = prompt('Enter PIN');
+            const { promptForPin } = await import('./pinPrompt.js');
+            const pin = await promptForPin('Enter PIN');
             if (!pin) throw new Error('PIN required');
             setStatus('Authenticating...');
             currentApiKey = await decryptStoredKey(pin);
@@ -135,6 +136,14 @@ if (typeof document !== 'undefined') {
           setStatus('Error: ' + e.message);
         }
       });
+      if (questionEl) {
+        questionEl.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            askBtn.click();
+          }
+        });
+      }
     }
 
     const stored = await getKeyRecord();
@@ -151,7 +160,8 @@ if (typeof document !== 'undefined') {
         if (!apiKey) {
           const record = await getKeyRecord();
           if (!record) throw new Error('No stored API key. Use the settings page.');
-          const pin = prompt('Enter PIN');
+          const { promptForPin } = await import('./pinPrompt.js');
+          const pin = await promptForPin('Enter PIN');
           if (!pin) throw new Error('PIN required');
           setStatus('Authenticating...');
           apiKey = await decryptStoredKey(pin);
@@ -177,6 +187,15 @@ if (typeof document !== 'undefined') {
         setStatus('Error: ' + e.message);
       }
     });
+    const urlInput = document.getElementById('url');
+    if (urlInput) {
+      urlInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          document.getElementById('summarize').click();
+        }
+      });
+    }
   });
 }
 /* c8 ignore end */
