@@ -62,3 +62,26 @@ test('history.js delete button removes entry', async () => {
   delete global.localStorage;
   delete global.confirm;
 });
+
+import { selectRecent, calculatePeriod } from '../history.js';
+
+test('selectRecent sorts by date and limits results', () => {
+  const items = [
+    { createdAt: '2020-01-01', id: 1 },
+    { createdAt: '2020-01-03', id: 3 },
+    { createdAt: '2020-01-02', id: 2 }
+  ];
+  const res = selectRecent(items, 2);
+  assert.deepEqual(res.map(i => i.id), [3, 2]);
+});
+
+test('calculatePeriod returns ISO date range', () => {
+  const items = [
+    { createdAt: '2020-01-04T00:00:00Z' },
+    { createdAt: '2020-01-02T00:00:00Z' },
+    { createdAt: '2020-01-03T00:00:00Z' }
+  ];
+  const period = calculatePeriod(items);
+  assert.deepEqual(period, { startStr: '2020-01-02', endStr: '2020-01-04' });
+  assert.deepEqual(calculatePeriod([]), { startStr: '', endStr: '' });
+});
