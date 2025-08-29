@@ -7,7 +7,7 @@ const dom = new JSDOM('');
 global.window = {};
 global.DOMParser = dom.window.DOMParser;
 
-import { fetchTranscript, fetchWithRetry, summarize } from '../main.js';
+import { fetchTranscript, fetchWithRetry, summarize } from '../src/pages/index.js';
 
 // fetchTranscript tests
 

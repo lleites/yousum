@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { summarizeNews } from '../api.js';
+import { summarizeNews } from '../src/services/api.js';
 
 test('summarizeNews returns trimmed content and sends items', async (t) => {
   const items = [
@@ -36,4 +36,3 @@ test('summarizeNews throws on API error', async (t) => {
   await assert.rejects(() => summarizeNews(items, 'KEY'), /bad/);
   global.fetch = origFetch;
 });
-

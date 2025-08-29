@@ -15,7 +15,7 @@ test('history.js sets trusted types policy', async () => {
     }
   };
   global.document = { addEventListener: () => {}, readyState: 'loading' };
-  await import('../history.js?policy');
+  await import('../src/pages/history.js?policy');
   assert.ok(created, 'expected policy to be created');
   delete global.window;
   delete global.document;
@@ -33,7 +33,7 @@ test('history.js initializes if DOM is already loaded', async () => {
     },
     setItem() {}
   };
-  await import('../history.js?init');
+  await import('../src/pages/history.js?init');
   assert.equal(dom.window.document.querySelectorAll('li').length, 1);
   delete global.window;
   delete global.document;
@@ -52,7 +52,7 @@ test('history.js delete button removes entry', async () => {
     getItem() { return JSON.stringify(this.data); },
     setItem(_k, v) { this.data = JSON.parse(v); }
   };
-  await import('../history.js?delete');
+  await import('../src/pages/history.js?delete');
   dom.window.document.querySelector('button.delete').click();
   const list = dom.window.document.querySelectorAll('li');
   assert.equal(list.length, 1);
@@ -63,7 +63,7 @@ test('history.js delete button removes entry', async () => {
   delete global.confirm;
 });
 
-import { selectRecent, calculatePeriod } from '../history.js';
+import { selectRecent, calculatePeriod } from '../src/pages/history.js';
 
 test('selectRecent sorts by date and limits results', () => {
   const items = [

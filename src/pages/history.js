@@ -1,8 +1,8 @@
-import { loadHistory, deleteHistory } from './historyManager.js';
-import { renderMarkdown } from './render.js';
-import { summarizeNews } from './api.js';
-import { askTranscript } from './api.js';
-import { getKeyRecord, decryptStoredKey } from './keyManager.js';
+import { loadHistory, deleteHistory } from '../services/history.js';
+import { renderMarkdown } from '../ui/render.js';
+import { summarizeNews } from '../services/api.js';
+import { askTranscript } from '../services/api.js';
+import { getKeyRecord, decryptStoredKey } from '../services/keys.js';
 
 export function selectRecent(items, limit = 20) {
   return [...items]
@@ -63,7 +63,7 @@ if (typeof document !== 'undefined') {
           if (!apiKey) {
             const record = await getKeyRecord();
             if (!record) throw new Error('No stored API key. Use the settings page.');
-            const { promptForPin } = await import('./pinPrompt.js');
+            const { promptForPin } = await import('../ui/pinPrompt.js');
             const pin = await promptForPin('Enter PIN');
             if (!pin) throw new Error('PIN required');
             apiKey = await decryptStoredKey(pin);
@@ -157,7 +157,7 @@ if (typeof document !== 'undefined') {
           if (!apiKey) {
             const record = await getKeyRecord();
             if (!record) throw new Error('No stored API key. Use the settings page.');
-            const { promptForPin } = await import('./pinPrompt.js');
+            const { promptForPin } = await import('../ui/pinPrompt.js');
             const pin = await promptForPin('Enter PIN');
             if (!pin) throw new Error('PIN required');
             apiKey = await decryptStoredKey(pin);

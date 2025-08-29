@@ -6,7 +6,7 @@ import {
   decryptStoredKey,
   getKeyRecord,
   clearStorage
-} from '../keyManager.js';
+} from '../src/services/keys.js';
 
 global.indexedDB = indexedDB;
 

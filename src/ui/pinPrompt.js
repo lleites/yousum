@@ -48,3 +48,4 @@ export function promptForPin(message = 'Enter PIN') {
     setTimeout(() => input.focus(), 0);
   });
 }
+

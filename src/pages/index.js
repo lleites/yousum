@@ -1,10 +1,10 @@
-import { getKeyRecord, decryptStoredKey } from './keyManager.js';
-import { addHistory } from './historyManager.js';
-import { renderMarkdown } from './render.js';
-import { summarize, askTranscript } from './api.js';
+import { getKeyRecord, decryptStoredKey } from '../services/keys.js';
+import { addHistory } from '../services/history.js';
+import { renderMarkdown } from '../ui/render.js';
+import { summarize, askTranscript } from '../services/api.js';
 
 export { renderMarkdown };
-export { summarize, askTranscript, fetchWithRetry } from './api.js';
+export { summarize, askTranscript, fetchWithRetry } from '../services/api.js';
 
 export function stripTracking(url) {
   try {
@@ -139,7 +139,7 @@ if (typeof document !== 'undefined') {
           if (!currentApiKey) {
             const record = await getKeyRecord();
             if (!record) throw new Error('No stored API key. Use the settings page.');
-            const { promptForPin } = await import('./pinPrompt.js');
+            const { promptForPin } = await import('../ui/pinPrompt.js');
             const pin = await promptForPin('Enter PIN');
             if (!pin) throw new Error('PIN required');
             setStatus('Authenticating...');
@@ -177,7 +177,7 @@ if (typeof document !== 'undefined') {
         if (!apiKey) {
           const record = await getKeyRecord();
           if (!record) throw new Error('No stored API key. Use the settings page.');
-          const { promptForPin } = await import('./pinPrompt.js');
+          const { promptForPin } = await import('../ui/pinPrompt.js');
           const pin = await promptForPin('Enter PIN');
           if (!pin) throw new Error('PIN required');
           setStatus('Authenticating...');

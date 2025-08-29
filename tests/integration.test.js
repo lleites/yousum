@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseVideoId, stripTracking } from '../main.js';
+import { parseVideoId, stripTracking } from '../src/pages/index.js';
 
 test('stripTracking removes params and parseVideoId handles live URLs', () => {
   const raw = 'https://www.youtube.com/live/_IYY70_L8Yc?si=GZk8dX-DchIUsgyi';

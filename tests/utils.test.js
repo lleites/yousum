@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseVideoId, renderMarkdown } from '../main.js';
+import { parseVideoId, renderMarkdown } from '../src/pages/index.js';
 
 // parseVideoId tests
 

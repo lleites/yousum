@@ -15,7 +15,7 @@ export async function fetchWithRetry(url, options, retries = 3) {
 }
 
 export async function summarize(text, apiKey) {
-  const promptRes = await fetch('summaryPrompt.md');
+  const promptRes = await fetch('prompts/summary.md');
   if (!promptRes.ok) throw new Error('Prompt not found');
   const prompt = await promptRes.text();
   const res = await fetchWithRetry('https://api.groq.com/openai/v1/chat/completions', {
@@ -42,7 +42,7 @@ export async function summarize(text, apiKey) {
 }
 
 export async function askTranscript(transcript, question, apiKey) {
-  const promptRes = await fetch('qaPrompt.md');
+  const promptRes = await fetch('prompts/qa.md');
   if (!promptRes.ok) throw new Error('Prompt not found');
   const prompt = await promptRes.text();
   const res = await fetchWithRetry('https://api.groq.com/openai/v1/chat/completions', {
@@ -70,7 +70,7 @@ export async function askTranscript(transcript, question, apiKey) {
 }
 
 export async function summarizeNews(items, apiKey) {
-  const promptRes = await fetch('newsSummaryPrompt.md');
+  const promptRes = await fetch('prompts/news.md');
   if (!promptRes.ok) throw new Error('Prompt not found');
   const prompt = await promptRes.text();
   const body = items

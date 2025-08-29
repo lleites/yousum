@@ -7,7 +7,7 @@ import {
   resetApiKey,
   generateHistoryExport,
   importHistoryText
-} from '../settings.js';
+} from '../src/pages/settings.js';
 
 test('saveApiKey validates inputs and stores key', async () => {
   const dom = new JSDOM('<input id="apiKey"><input id="pin"><button id="saveKey"></button><button id="decryptKey" class="hidden"></button><button id="resetKey" class="hidden"></button>');

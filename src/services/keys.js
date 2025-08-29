@@ -5,9 +5,6 @@ const WEBAUTHN_STORE = 'webauthn';
 
 function openDB() {
   return new Promise((resolve, reject) => {
-    // Bump the database version when object stores change so that
-    // onupgradeneeded runs for users with older databases. This removes
-    // the legacy WebAuthn store now that biometric auth is gone.
     const request = indexedDB.open(DB_NAME, DB_VERSION);
     request.onupgradeneeded = () => {
       const db = request.result;
@@ -105,3 +102,4 @@ export async function decryptStoredKey(pin) {
   }
   return new TextDecoder().decode(decrypted);
 }
+

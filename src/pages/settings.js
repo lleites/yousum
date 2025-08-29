@@ -1,5 +1,5 @@
-import { encryptAndStoreKey, decryptStoredKey, getKeyRecord, clearStorage } from './keyManager.js';
-import { loadHistory, mergeHistory } from './historyManager.js';
+import { encryptAndStoreKey, decryptStoredKey, getKeyRecord, clearStorage } from '../services/keys.js';
+import { loadHistory, mergeHistory } from '../services/history.js';
 
 export function generateHistoryExport(items, now = new Date()) {
   const data = JSON.stringify(items, null, 2);
@@ -117,7 +117,7 @@ if (typeof document !== 'undefined') {
     });
 
     decryptBtn.addEventListener('click', async () => {
-      const { promptForPin } = await import('./pinPrompt.js');
+      const { promptForPin } = await import('../ui/pinPrompt.js');
       try {
         await decryptApiKey(decryptStoredKey, promptForPin, setStatus);
       } catch (e) {

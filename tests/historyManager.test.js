@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addHistory, loadHistory, deleteHistory, mergeHistory } from '../historyManager.js';
+import { addHistory, loadHistory, deleteHistory, mergeHistory } from '../src/services/history.js';
 
 class FakeStorage {
   constructor() { this.store = {}; }

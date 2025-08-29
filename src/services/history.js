@@ -50,3 +50,4 @@ export function mergeHistory(entries) {
   } catch {}
   return { added, total: existing.length };
 }
+

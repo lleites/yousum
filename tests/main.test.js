@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { stripTracking, parseVideoId } from '../main.js';
+import { stripTracking, parseVideoId } from '../src/pages/index.js';
 
 test('stripTracking removes tracking parameters', () => {
   assert.equal(

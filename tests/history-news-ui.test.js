@@ -8,11 +8,10 @@ test('news summary button shows message when no items', async () => {
   global.window = dom.window;
   global.document = dom.window.document;
   global.localStorage = { getItem() { return null; }, setItem() {} };
-  await import('../history.js?news');
+  await import('../src/pages/history.js?news');
   dom.window.document.getElementById('summarizeNews').click();
   assert.equal(dom.window.document.getElementById('newsSummary').textContent, 'No items to summarize.');
   delete global.window;
   delete global.document;
   delete global.localStorage;
 });
-

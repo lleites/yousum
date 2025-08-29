@@ -7,7 +7,7 @@ test('errors are logged to #log', async () => {
   global.window = dom.window;
   global.document = dom.window.document;
 
-  await import('../errors.js');
+  await import('../src/utils/errors.js');
 
   window.dispatchEvent(new dom.window.ErrorEvent('error', { message: 'boom' }));
   const rej = new dom.window.Event('unhandledrejection');
