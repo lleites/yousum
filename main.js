@@ -1,7 +1,7 @@
 import { getKeyRecord, decryptStoredKey } from './keyManager.js';
 import { addHistory } from './historyManager.js';
 import { renderMarkdown } from './render.js';
-import { summarize, askTranscript, fetchWithRetry } from './api.js';
+import { summarize, askTranscript } from './api.js';
 
 export { renderMarkdown };
 export { summarize, askTranscript, fetchWithRetry } from './api.js';

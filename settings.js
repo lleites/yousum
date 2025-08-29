@@ -4,7 +4,7 @@ import { loadHistory, mergeHistory } from './historyManager.js';
 export function generateHistoryExport(items, now = new Date()) {
   const data = JSON.stringify(items, null, 2);
   const pad = n => String(n).padStart(2, '0');
-  const name = `yousum-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}.json`;
+  const name = `yousum-${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}-${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}${pad(now.getUTCSeconds())}.json`;
   return { data, name };
 }
 

@@ -4,11 +4,14 @@
 
 - Root hosts the static site: `index.html`, `history.html`, `settings.html`, `styles.css`.
 - JavaScript modules live at repo root: `main.js`, `api.js`, `render.js`, `historyManager.js`, `keyManager.js`, `errors.js`.
+- Lint config at repo root: `eslint.config.js` (ESLint v9 flat config).
+- GitHub Actions: `.github/workflows/test.yml` (tests) and `.github/workflows/lint.yml` (lint).
 - Tests are in `tests/` with `*.test.js` using Node’s test runner.
 - No build step; files are served as-is.
 
 ## Build, Test, Run
 
+- Lint: `npm run lint` (auto-fix: `npm run lint:fix`).
 - Test: `npm test`
   - Runs Node’s test runner under `c8` with coverage checks (85% lines/functions/statements).
 - Run locally: open `index.html` via a static server (any equivalent works), e.g. `npx http-server .` or `npx serve .`.
@@ -20,7 +23,7 @@
 - Indentation: 2 spaces; end lines with semicolons.
 - Naming: camelCase for variables/functions, UPPER_SNAKE for constants, kebab-case for HTML ids/classes.
 - Files: concise, purpose-focused modules at repo root; `.js` for code, `.html` for pages, `.css` for styles.
-- Linting: none enforced; match existing style and keep functions small.
+- Linting: ESLint v9 flat config (`eslint.config.js`) with `@eslint/js` recommended. Enforces `no-var` and `no-unused-vars`; encourages modern patterns (template strings, destructuring, arrow callbacks, object shorthand, spread/rest, etc.).
 
 ## Testing Guidelines
 
@@ -44,3 +47,10 @@
 
 - Do not commit API keys. Configure via the settings page; stored keys are encrypted by the app.
 - Be mindful of external requests (YouTube transcript fetch and summarization API). Avoid adding new dependencies without a clear need.
+
+## CI
+
+- GitHub Actions uses Node 22.
+- Workflows:
+  - Tests: `.github/workflows/test.yml` runs `npm ci` + `npm test` with coverage checks (≥85%).
+  - Lint: `.github/workflows/lint.yml` runs `npm run lint` on push and PR.
