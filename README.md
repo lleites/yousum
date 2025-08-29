@@ -33,4 +33,7 @@ This project is a self-contained GitHub Pages site that summarizes the transcrip
 - Secure key storage uses the Web Crypto API to encrypt the API key with a PIN you choose.
 
 ## Development
-No build step is required; the site is pure HTML/JS/CSS. Run `npm test` to execute the small test suite.
+- Run locally: serve the repo and open `index.html` (e.g., `npx http-server .` or `npx serve .`).
+- Lint: `npm run lint` (auto-fix: `npm run lint:fix`).
+- Tests: `npm test` runs Node’s test runner under `c8` with 85% coverage gates. Quick file run: `node --test tests/<file>.test.js`.
+- CI: `/.github/workflows/ci.yml` runs lint and tests in parallel on Node 22 with npm caching, minimal `contents: read` permissions, concurrency to cancel superseded runs, and uploads the `coverage/` artifact on test completion.
