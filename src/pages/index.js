@@ -91,85 +91,92 @@ if (typeof window !== 'undefined' && window.trustedTypes && !window.trustedTypes
   });
 }
 
-if (typeof document !== 'undefined') {
-  document.addEventListener('DOMContentLoaded', async () => {
-    const status = document.getElementById('status');
-    const logEl = document.getElementById('log');
-    const logBox = document.getElementById('logBox');
-    const summaryHeader = document.getElementById('summary-heading');
-    const summaryEl = document.getElementById('summary');
-    const askHeader = document.getElementById('ask-heading');
-    const askSection = document.getElementById('askSection');
-    const questionEl = document.getElementById('question');
-    const askBtn = document.getElementById('ask');
-    const answerEl = document.getElementById('answer');
-    const log = msg => { if (logEl) logEl.textContent += msg + '\n'; };
-    const setStatus = msg => { status.textContent = msg; log(msg); };
-    const hideInitialSections = () => {
-      [logBox, summaryHeader, summaryEl, askHeader, askSection].forEach(el => {
-        if (el) el.classList.add('hidden');
-      });
-    };
-    const showSectionAfterSummary = () => {
-      [logBox, summaryHeader, summaryEl, askHeader, askSection].forEach(el => {
-        if (el) el.classList.remove('hidden');
-      });
-      if (askSection) {
-        answerEl.innerHTML = '';
-        questionEl.value = '';
-      }
-    };
-    hideInitialSections();
-    let lastTranscript = '';
-    let currentApiKey = '';
-    let keyClearTimer;
-    const scheduleKeyClear = () => {
-      if (keyClearTimer) clearTimeout(keyClearTimer);
-      keyClearTimer = setTimeout(() => { currentApiKey = ''; }, 120000);
-    };
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) currentApiKey = '';
+let indexPageInitialized = false;
+
+export async function initIndexPage() {
+  if (indexPageInitialized || typeof document === 'undefined') return;
+  indexPageInitialized = true;
+  const status = document.getElementById('status');
+  const logEl = document.getElementById('log');
+  const logBox = document.getElementById('logBox');
+  const summaryHeader = document.getElementById('summary-heading');
+  const summaryEl = document.getElementById('summary');
+  const askHeader = document.getElementById('ask-heading');
+  const askSection = document.getElementById('askSection');
+  const questionEl = document.getElementById('question');
+  const askBtn = document.getElementById('ask');
+  const answerEl = document.getElementById('answer');
+  const urlInput = document.getElementById('url');
+  const clipboardBtn = document.getElementById('paste-clipboard');
+  const summarizeBtn = document.getElementById('summarize');
+  const log = msg => { if (logEl) logEl.textContent += msg + '\n'; };
+  const setStatus = msg => { if (status) status.textContent = msg; log(msg); };
+  const hideInitialSections = () => {
+    [logBox, summaryHeader, summaryEl, askHeader, askSection].forEach(el => {
+      if (el) el.classList.add('hidden');
     });
-    window.addEventListener('beforeunload', () => { currentApiKey = ''; });
-    if (askBtn) {
-      askBtn.addEventListener('click', async () => {
-        const q = questionEl.value.trim();
-        if (!q) return;
-        try {
-          if (!currentApiKey) {
-            const record = await getKeyRecord();
-            if (!record) throw new Error('No stored API key. Use the settings page.');
-            const { promptForPin } = await import('../ui/pinPrompt.js');
-            const pin = await promptForPin('Enter PIN');
-            if (!pin) throw new Error('PIN required');
-            setStatus('Authenticating...');
-            currentApiKey = await decryptStoredKey(pin);
-          }
-          setStatus('Asking...');
-          const ans = await askTranscript(lastTranscript, q, currentApiKey);
-          answerEl.innerHTML = renderMarkdown(ans);
-          setStatus('Done.');
-          scheduleKeyClear();
-        } catch (e) {
-          setStatus('Error: ' + e.message);
+  };
+  const showSectionAfterSummary = () => {
+    [logBox, summaryHeader, summaryEl, askHeader, askSection].forEach(el => {
+      if (el) el.classList.remove('hidden');
+    });
+    if (askSection) {
+      answerEl.innerHTML = '';
+      questionEl.value = '';
+    }
+  };
+  hideInitialSections();
+  let lastTranscript = '';
+  let currentApiKey = '';
+  let keyClearTimer;
+  const scheduleKeyClear = () => {
+    if (keyClearTimer) clearTimeout(keyClearTimer);
+    keyClearTimer = setTimeout(() => { currentApiKey = ''; }, 120000);
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) currentApiKey = '';
+  });
+  window.addEventListener('beforeunload', () => { currentApiKey = ''; });
+  if (askBtn) {
+    askBtn.addEventListener('click', async () => {
+      const q = questionEl.value.trim();
+      if (!q) return;
+      try {
+        if (!currentApiKey) {
+          const record = await getKeyRecord();
+          if (!record) throw new Error('No stored API key. Use the settings page.');
+          const { promptForPin } = await import('../ui/pinPrompt.js');
+          const pin = await promptForPin('Enter PIN');
+          if (!pin) throw new Error('PIN required');
+          setStatus('Authenticating...');
+          currentApiKey = await decryptStoredKey(pin);
+        }
+        setStatus('Asking...');
+        const ans = await askTranscript(lastTranscript, q, currentApiKey);
+        answerEl.innerHTML = renderMarkdown(ans);
+        setStatus('Done.');
+        scheduleKeyClear();
+      } catch (e) {
+        setStatus('Error: ' + e.message);
+      }
+    });
+    if (questionEl) {
+      questionEl.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          askBtn.click();
         }
       });
-      if (questionEl) {
-        questionEl.addEventListener('keydown', e => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            askBtn.click();
-          }
-        });
-      }
     }
+  }
 
-    const stored = await getKeyRecord();
-    if (!stored) {
-      setStatus('No API key stored. Visit the settings page to configure one.');
-    }
-      document.getElementById('summarize').addEventListener('click', async () => {
-        const url = stripTracking(document.getElementById('url').value);
+  const stored = await getKeyRecord();
+  if (!stored) {
+    setStatus('No API key stored. Visit the settings page to configure one.');
+  }
+  if (summarizeBtn && urlInput) {
+    summarizeBtn.addEventListener('click', async () => {
+      const url = stripTracking(urlInput.value);
       summaryEl.innerHTML = '';
       if (logEl) logEl.textContent = '';
       try {
@@ -200,15 +207,34 @@ if (typeof document !== 'undefined') {
         setStatus('Error: ' + e.message);
       }
     });
-    const urlInput = document.getElementById('url');
-    if (urlInput) {
-      urlInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          document.getElementById('summarize').click();
-        }
-      });
-    }
+  }
+  if (urlInput) {
+    urlInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (summarizeBtn) summarizeBtn.click();
+      }
+    });
+  }
+  if (clipboardBtn && urlInput) {
+    clipboardBtn.addEventListener('click', async () => {
+      if (typeof navigator === 'undefined' || !navigator.clipboard || !navigator.clipboard.readText) {
+        setStatus('Error: Clipboard unavailable');
+        return;
+      }
+      try {
+        const text = await navigator.clipboard.readText();
+        urlInput.value = text.trim();
+      } catch {
+        setStatus('Error: Unable to read clipboard');
+      }
+    });
+  }
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('DOMContentLoaded', () => {
+    void initIndexPage();
   });
 }
 /* c8 ignore end */

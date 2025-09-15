@@ -11,7 +11,10 @@
     <nav></nav>
     <h1>YouTube Video Summarizer</h1>
     <p>Enter a YouTube URL to summarize its transcript. Configure your Groq API key and PIN on the <a href="settings.html">settings page</a>.</p>
-    <input type="text" id="url" placeholder="YouTube URL">
+    <div class="url-input-group">
+      <input type="text" id="url" placeholder="YouTube URL">
+      <button id="paste-clipboard" type="button" aria-label="Paste URL from clipboard" title="Paste URL from clipboard">📋</button>
+    </div>
     <button id="summarize">Summarize</button>
     <div id="status"></div>
     <details id="logBox" class="hidden">
